@@ -1,0 +1,33 @@
+version: '3.7'
+
+services:
+    app:
+        container_name: authentication
+        build:
+            context: .
+        environment:
+            - SERVER_PORT=8080
+            - SERVER_MODE=debug
+            - DB_DRIVER=mongodb
+            - DB_HOST=mongodb
+            - DB_PORT=27017
+            - DB_USERNAME=root
+            - DB_PASSWORD=root
+            - DB_DATABASE=authentication
+        depends_on:
+            - mongodb
+        ports:
+            - 8080:8080
+
+    mongodb:
+        image: mongo:latest
+        container_name: mongodb
+        restart: always
+        environment:
+            MONGO_INITDB_ROOT_USERNAME: root
+            MONGO_INITDB_ROOT_PASSWORD: root
+            MONGO_INITDB_DATABASE: authentication
+        ports:
+            - 27017:27017
+        volumes:
+            - ./scripts/database/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
