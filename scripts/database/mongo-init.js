@@ -19,6 +19,9 @@ print("\n ----- Authentication database created ----- \n")
 db.createCollection('user');
 print("\n ----- User collection created ----- \n")
 
+db.user.createIndex( { "username": 1 }, { unique: true } )
+print("\n ----- Username unique index created ----- \n")
+
 db.user.insertOne(user);
 print("\n ----- Admin user inserted ----- \n")
 
