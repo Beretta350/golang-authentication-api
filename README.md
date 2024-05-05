@@ -15,15 +15,15 @@ So, if you have questions about the layout check the **link above**!
 
 ## Key Technologies
 
-- **GIN (Web Framework)**: The application leverages the Gin web framework to handle HTTP requests, routing, and middleware, ensuring fast and scalable API development.
+- [**GIN (Web Framework)**](https://github.com/gin-gonic/gin): The application leverages the Gin web framework to handle HTTP requests, routing, and middleware, ensuring fast and scalable API development.
 
-- **JWT (JSON Web Token)**: JWT token creation, validation, and parsing to provide a secure and efficient way to manage authentication and authorization in the application.
+- [**JWT (JSON Web Token)**](https://jwt.io/): JWT token creation, validation, and parsing to provide a secure and efficient way to manage authentication and authorization in the application.
 
-- **Bcrypt (Cryptography package)**: Securely hash and compare passwords providing a reliable method for storing and verifying passwords, ensuring that user credentials are protected against unauthorized access.
+- [**Bcrypt (Cryptography package)**](https://pkg.go.dev/golang.org/x/crypto): Securely hash and compare passwords providing a reliable method for storing and verifying passwords, ensuring that user credentials are protected against unauthorized access.
 
-- **Docker**: Docker is used to containerize the application, making it easy to manage dependencies and ensure consistency across different environments.
+- [**Docker**](https://www.docker.com/): Docker is used to containerize the application, making it easy to manage dependencies and ensure consistency across different environments.
 
-- **MongoDB**: NoSQL database with a robust and efficient way to perform CRUD operations, query data, and manage transactions in the application.
+- [**MongoDB**](https://www.mongodb.com/): NoSQL database with a robust and efficient way to perform CRUD operations, query data, and manage transactions in the application.
 
 ## Get Started
 
