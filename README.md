@@ -7,6 +7,12 @@
 
 A simple lightweight authentication API built in Golang designed to be a fast and easy start for other projects. It includes JWT token generation for secure authentication, bcrypt cryptography for password hashing, and MongoDB for storing user credentials.
 
+## Layout
+
+The project focuses on enabling a fast and easy start. Thinking on that, nothing better than the [**golang standards project layout**](https://github.com/golang-standards/project-layout). A well known layout among Go users that encourages best practices like modularization and separation of concerns, which can improve code quality and scalability. 
+
+So, if you have questions about the layout check the **link above**!
+
 ## Key Technologies
 
 - **GIN (Web Framework)**: The application leverages the Gin web framework to handle HTTP requests, routing, and middleware, ensuring fast and scalable API development.
