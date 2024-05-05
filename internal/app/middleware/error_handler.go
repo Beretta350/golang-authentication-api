@@ -18,18 +18,13 @@ func GlobalErrorHandler() gin.HandlerFunc {
 			return
 		}
 
-		var validationErrors validator.ValidationErrors
 		var response *dto.ResponseMessage
+		var validationErrors validator.ValidationErrors
 
 		err := c.Errors.Last().Err
 		switch {
 		case errors.As(err, &validationErrors):
-			var errs []string
-			for _, e := range validationErrors {
-				errMsg := strings.Split(e.Error(), "Error:")[1]
-				errs = append(errs, errMsg)
-			}
-			response = dto.BadRequestResponse("Invalid data", errs)
+			response = multipleErrorMessages(validationErrors)
 		case errors.Is(err, bcrypt.ErrMismatchedHashAndPassword):
 			response = dto.UnauthorizedResponse("Invalid username or password")
 		default:
@@ -37,4 +32,13 @@ func GlobalErrorHandler() gin.HandlerFunc {
 		}
 		c.JSON(response.StatusCode, response)
 	}
+}
+
+func multipleErrorMessages(validationErrors validator.ValidationErrors) *dto.ResponseMessage {
+	var errs []string
+	for _, e := range validationErrors {
+		errMsg := strings.Split(e.Error(), "Error:")[1]
+		errs = append(errs, errMsg)
+	}
+	return dto.BadRequestResponse("Invalid data", errs)
 }

@@ -10,8 +10,8 @@ import (
 )
 
 type UserService interface {
-	Save(ctx context.Context, request dto.UserRequest) (*dto.ResponseMessage, error)
-	Login(ctx context.Context, request dto.UserRequest) (*dto.ResponseMessage, error)
+	Save(ctx context.Context, request dto.UserRequest) (*model.User, error)
+	Login(ctx context.Context, request dto.UserRequest) (*model.User, error)
 }
 
 type userService struct {
@@ -22,7 +22,7 @@ func NewUserService(r repository.UserRepository) *userService {
 	return &userService{repo: r}
 }
 
-func (us *userService) Login(ctx context.Context, request dto.UserRequest) (*dto.ResponseMessage, error) {
+func (us *userService) Login(ctx context.Context, request dto.UserRequest) (*model.User, error) {
 
 	//Find
 	user, err := us.repo.FindByUsername(ctx, request.Username)
@@ -36,10 +36,10 @@ func (us *userService) Login(ctx context.Context, request dto.UserRequest) (*dto
 		return nil, err
 	}
 
-	return dto.OkResponse("Login with success", user), nil
+	return user, nil
 }
 
-func (us *userService) Save(ctx context.Context, request dto.UserRequest) (*dto.ResponseMessage, error) {
+func (us *userService) Save(ctx context.Context, request dto.UserRequest) (*model.User, error) {
 	user := model.NewUserModel(request)
 	err := user.Validate()
 	if err != nil {
@@ -57,5 +57,5 @@ func (us *userService) Save(ctx context.Context, request dto.UserRequest) (*dto.
 	if err != nil {
 		return nil, err
 	}
-	return dto.CreatedResponse("User created with success", nil), nil
+	return user, nil
 }

@@ -37,14 +37,11 @@ func (wrap *jwtWrapper) GenerateJWT(username string) (string, error) {
 }
 
 func (wrap *jwtWrapper) ValidateToken(username string, tokenString string) (bool, error) {
-	if len(tokenString) <= 0 {
-		return false, nil
-	}
-
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		return []byte(wrap.secretKey), nil
 	})
 
+	//Token not valid error
 	if err != nil {
 		return false, err
 	}
