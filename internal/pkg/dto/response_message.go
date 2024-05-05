@@ -30,13 +30,13 @@ func CreatedResponse(message string, data any) *ResponseMessage {
 	)
 }
 
-func UnauthorizedResponse(message string) *ResponseMessage {
+func UnauthorizedResponse(message string, errs any) *ResponseMessage {
 	return newResponseMessage(
 		http.StatusUnauthorized,
 		http.StatusText(http.StatusUnauthorized),
 		message,
 		nil,
-		nil,
+		errs,
 	)
 }
 
