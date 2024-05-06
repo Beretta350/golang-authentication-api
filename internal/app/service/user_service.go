@@ -6,12 +6,13 @@ import (
 	"github.com/Beretta350/authentication/internal/app/model"
 	"github.com/Beretta350/authentication/internal/app/repository"
 	"github.com/Beretta350/authentication/internal/pkg/crypto"
-	"github.com/Beretta350/authentication/internal/pkg/dto"
 )
 
 type UserService interface {
-	Save(ctx context.Context, request dto.UserRequest) (*model.User, error)
-	Login(ctx context.Context, request dto.UserRequest) (*model.User, error)
+	Login(ctx context.Context, userReq model.User) (*model.User, error)
+	Save(ctx context.Context, userReq model.User) (*model.User, error)
+	Update(ctx context.Context, userReq model.User) (*model.User, error)
+	Delete(ctx context.Context, username string) error
 }
 
 type userService struct {
@@ -22,16 +23,16 @@ func NewUserService(r repository.UserRepository) *userService {
 	return &userService{repo: r}
 }
 
-func (us *userService) Login(ctx context.Context, request dto.UserRequest) (*model.User, error) {
+func (us *userService) Login(ctx context.Context, userReq model.User) (*model.User, error) {
 
 	//Find
-	user, err := us.repo.FindByUsername(ctx, request.Username)
+	user, err := us.repo.FindByUsername(ctx, userReq.Username)
 	if err != nil {
 		return nil, err
 	}
 
 	//Check password
-	err = crypto.CheckPassword(request.Password, []byte(user.Password))
+	err = crypto.CheckPassword(userReq.Password, []byte(user.Password))
 	if err != nil {
 		return nil, err
 	}
@@ -39,8 +40,8 @@ func (us *userService) Login(ctx context.Context, request dto.UserRequest) (*mod
 	return user, nil
 }
 
-func (us *userService) Save(ctx context.Context, request dto.UserRequest) (*model.User, error) {
-	user := model.NewUserModel(request)
+func (us *userService) Save(ctx context.Context, userReq model.User) (*model.User, error) {
+	user := model.NewUserModel(userReq.Username, userReq.Password, userReq.Roles)
 	err := user.Validate()
 	if err != nil {
 		return nil, err
@@ -58,4 +59,48 @@ func (us *userService) Save(ctx context.Context, request dto.UserRequest) (*mode
 		return nil, err
 	}
 	return user, nil
+}
+
+func (us *userService) Update(ctx context.Context, userReq model.User) (*model.User, error) {
+	user, err := us.repo.FindByUsername(ctx, userReq.Username)
+	if err != nil {
+		return nil, err
+	}
+
+	err = user.Validate()
+	if err != nil {
+		return nil, err
+	}
+
+	encryptedData, err := crypto.EncryptPassword(userReq.Password)
+	if err != nil {
+		return nil, err
+	}
+
+	user.Password = string(encryptedData)
+
+	updatedUser, err := us.repo.Update(ctx, user)
+	if err != nil {
+		return nil, err
+	}
+
+	return updatedUser, nil
+}
+
+func (us *userService) Delete(ctx context.Context, username string) error {
+	user, err := us.repo.FindByUsername(ctx, username)
+	if err != nil {
+		return err
+	}
+
+	err = user.Validate()
+	if err != nil {
+		return err
+	}
+
+	err = us.repo.Delete(ctx, user)
+	if err != nil {
+		return err
+	}
+	return nil
 }

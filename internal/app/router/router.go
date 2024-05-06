@@ -38,7 +38,9 @@ func Setup() *gin.Engine {
 }
 
 func SetupUserRoutes(engine *gin.Engine, controller controller.UserController) *gin.Engine {
-	engine.POST("/save", controller.Save)
 	engine.POST("/login", controller.Login)
+	engine.POST("/save", controller.Save)
+	engine.PUT("/update", controller.Update)
+	engine.DELETE("/delete", controller.Delete)
 	return engine
 }
