@@ -1,6 +1,6 @@
 package dto
 
-import "github.com/Beretta350/authentication/internal/app/model"
+import "github.com/Beretta350/authentication/internal/app/user/model"
 
 type UserResponse struct {
 	ID       string   `json:"id"`

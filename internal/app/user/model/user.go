@@ -1,21 +1,22 @@
 package model
 
 import (
-	"github.com/Beretta350/authentication/internal/app/enum"
+	"github.com/Beretta350/authentication/internal/app/common/enum"
+	commonModel "github.com/Beretta350/authentication/internal/app/common/model"
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 )
 
 type User struct {
-	Base     `bson:",inline"`
-	Username string   `json:"username" bson:"username" validate:"required,min=3"`
-	Password string   `json:"password" bson:"password" validate:"required,min=8"`
-	Roles    []string `json:"roles,omitempty" bson:"roles" validate:"required,gt=0,validRoles"`
+	commonModel.Base `bson:",inline"`
+	Username         string   `json:"username" bson:"username" validate:"required,min=3"`
+	Password         string   `json:"password" bson:"password" validate:"required,min=8"`
+	Roles            []string `json:"roles,omitempty" bson:"roles" validate:"required,gt=0,validRoles"`
 }
 
 func NewUserModel(username, password string, roles []string) *User {
 	id := uuid.NewString()
-	return &User{Base: Base{ID: id}, Username: username, Password: password, Roles: roles}
+	return &User{Base: commonModel.Base{ID: id}, Username: username, Password: password, Roles: roles}
 }
 
 func (u User) Validate() error {

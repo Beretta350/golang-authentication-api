@@ -5,8 +5,8 @@ import (
 	"io"
 	"os"
 
-	"github.com/Beretta350/authentication/internal/app/controller"
-	"github.com/Beretta350/authentication/internal/app/middleware"
+	"github.com/Beretta350/authentication/internal/app/common/middleware"
+	userController "github.com/Beretta350/authentication/internal/app/user/controller"
 	"github.com/gin-gonic/gin"
 )
 
@@ -37,7 +37,7 @@ func Setup() *gin.Engine {
 	return app
 }
 
-func SetupUserRoutes(engine *gin.Engine, controller controller.UserController) *gin.Engine {
+func SetupUserRoutes(engine *gin.Engine, controller userController.UserController) *gin.Engine {
 	engine.POST("/login", controller.Login)
 	engine.POST("/save", controller.Save)
 	engine.PUT("/update", controller.Update)

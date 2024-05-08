@@ -5,16 +5,16 @@ import (
 	"errors"
 	"time"
 
-	"github.com/Beretta350/authentication/internal/app/model"
+	userModel "github.com/Beretta350/authentication/internal/app/user/model"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type UserRepository interface {
-	Save(ctx context.Context, user *model.User) error
-	Update(ctx context.Context, user *model.User) (*model.User, error)
-	Delete(ctx context.Context, user *model.User) error
-	FindByUsername(ctx context.Context, username string) (*model.User, error)
+	Save(ctx context.Context, user *userModel.User) error
+	Update(ctx context.Context, user *userModel.User) (*userModel.User, error)
+	Delete(ctx context.Context, user *userModel.User) error
+	FindByUsername(ctx context.Context, username string) (*userModel.User, error)
 }
 
 type userRepository struct {
@@ -25,7 +25,7 @@ func NewUserRepository(d *mongo.Database) *userRepository {
 	return &userRepository{collection: d.Collection("user")}
 }
 
-func (ur *userRepository) Save(ctx context.Context, user *model.User) error {
+func (ur *userRepository) Save(ctx context.Context, user *userModel.User) error {
 
 	user.CreatedAt = time.Now()
 	user.UpdatedAt = time.Now()
@@ -37,7 +37,7 @@ func (ur *userRepository) Save(ctx context.Context, user *model.User) error {
 	return nil
 }
 
-func (ur *userRepository) Update(ctx context.Context, user *model.User) (*model.User, error) {
+func (ur *userRepository) Update(ctx context.Context, user *userModel.User) (*userModel.User, error) {
 	filter := bson.M{"_id": user.ID, "username": user.Username}
 	update := bson.M{"$set": user}
 
@@ -55,7 +55,7 @@ func (ur *userRepository) Update(ctx context.Context, user *model.User) (*model.
 	return user, nil
 }
 
-func (ur *userRepository) Delete(ctx context.Context, user *model.User) error {
+func (ur *userRepository) Delete(ctx context.Context, user *userModel.User) error {
 	filter := bson.M{"_id": user.ID, "username": user.Username}
 	_, err := ur.collection.DeleteOne(ctx, filter)
 	if err != nil {
@@ -64,8 +64,8 @@ func (ur *userRepository) Delete(ctx context.Context, user *model.User) error {
 	return nil
 }
 
-func (ur *userRepository) FindByUsername(ctx context.Context, username string) (*model.User, error) {
-	var user model.User
+func (ur *userRepository) FindByUsername(ctx context.Context, username string) (*userModel.User, error) {
+	var user userModel.User
 	filter := bson.M{"username": username}
 	err := ur.collection.FindOne(ctx, filter).Decode(&user)
 	if err != nil {

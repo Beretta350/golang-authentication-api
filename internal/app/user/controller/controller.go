@@ -4,8 +4,8 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/Beretta350/authentication/internal/app/model"
-	"github.com/Beretta350/authentication/internal/app/service"
+	userModel "github.com/Beretta350/authentication/internal/app/user/model"
+	userService "github.com/Beretta350/authentication/internal/app/user/service"
 	"github.com/Beretta350/authentication/internal/pkg/dto"
 	"github.com/Beretta350/authentication/pkg/jwt"
 	"github.com/gin-gonic/gin"
@@ -19,18 +19,18 @@ type UserController interface {
 }
 
 type userController struct {
-	service service.UserService
+	service userService.UserService
 	jwt     jwt.JWTWrapper
 }
 
-func NewUserController(s service.UserService, j jwt.JWTWrapper) *userController {
+func NewUserController(s userService.UserService, j jwt.JWTWrapper) *userController {
 	return &userController{service: s, jwt: j}
 }
 
 func (uc *userController) Login(c *gin.Context) {
 	authHeader := c.GetHeader("Authorization")
 
-	userReq := model.User{}
+	userReq := userModel.User{}
 	err := c.BindJSON(&userReq)
 	if err != nil {
 		c.Error(err)
@@ -64,7 +64,7 @@ func (uc *userController) Login(c *gin.Context) {
 }
 
 func (uc *userController) Save(c *gin.Context) {
-	userReq := model.User{}
+	userReq := userModel.User{}
 	err := c.BindJSON(&userReq)
 	if err != nil {
 		c.Error(err)
@@ -83,7 +83,7 @@ func (uc *userController) Save(c *gin.Context) {
 func (uc *userController) Update(c *gin.Context) {
 	authHeader := c.GetHeader("Authorization")
 
-	userReq := model.User{}
+	userReq := userModel.User{}
 	err := c.BindJSON(&userReq)
 	if err != nil {
 		c.Error(err)

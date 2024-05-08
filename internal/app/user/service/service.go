@@ -3,8 +3,8 @@ package service
 import (
 	"context"
 
-	"github.com/Beretta350/authentication/internal/app/model"
-	"github.com/Beretta350/authentication/internal/app/repository"
+	"github.com/Beretta350/authentication/internal/app/user/model"
+	userRepo "github.com/Beretta350/authentication/internal/app/user/repository"
 	"github.com/Beretta350/authentication/internal/pkg/crypto"
 )
 
@@ -16,10 +16,10 @@ type UserService interface {
 }
 
 type userService struct {
-	repo repository.UserRepository
+	repo userRepo.UserRepository
 }
 
-func NewUserService(r repository.UserRepository) *userService {
+func NewUserService(r userRepo.UserRepository) *userService {
 	return &userService{repo: r}
 }
 
