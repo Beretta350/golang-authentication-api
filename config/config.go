@@ -28,9 +28,10 @@ type Config interface {
 }
 
 type Configuration struct {
-	Database  DatabaseConfig
-	Server    ServerConfig
-	JWTSecret string
+	Database   DatabaseConfig
+	Server     ServerConfig
+	JWTSecret  string
+	CSRFSecret string
 }
 
 func Setup(configFile string) {
@@ -67,9 +68,10 @@ func Setup(configFile string) {
 	}
 
 	config = &Configuration{
-		Database:  dbConfig,
-		Server:    serverConfig,
-		JWTSecret: os.Getenv("JWT_SECRET"),
+		Database:   dbConfig,
+		Server:     serverConfig,
+		JWTSecret:  os.Getenv("JWT_SECRET"),
+		CSRFSecret: os.Getenv("CSRF_SECRET"),
 	}
 }
 

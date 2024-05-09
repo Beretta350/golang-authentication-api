@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"errors"
 	"net/http"
 
 	userModel "github.com/Beretta350/authentication/internal/app/user/model"
@@ -23,25 +22,15 @@ type userController struct {
 	jwt     jwt.JWTWrapper
 }
 
-func NewUserController(s userService.UserService, j jwt.JWTWrapper) *userController {
-	return &userController{service: s, jwt: j}
+func NewUserController(s userService.UserService) *userController {
+	return &userController{service: s}
 }
 
 func (uc *userController) Login(c *gin.Context) {
-	authHeader := c.GetHeader("Authorization")
-
 	userReq := userModel.User{}
 	err := c.BindJSON(&userReq)
 	if err != nil {
 		c.Error(err)
-		return
-	}
-
-	if len(authHeader) > 0 {
-		loged := uc.loginWithToken(c, userReq.Username, authHeader)
-		if loged {
-			c.JSON(http.StatusOK, dto.OkResponse("User is already logged", nil))
-		}
 		return
 	}
 
@@ -51,7 +40,7 @@ func (uc *userController) Login(c *gin.Context) {
 		return
 	}
 
-	token, err := uc.jwt.GenerateJWT(user.Username)
+	token, err := jwt.GetJWTWrapper().GenerateJWT(user.Username)
 	if err != nil {
 		c.Error(err)
 		return
@@ -81,7 +70,6 @@ func (uc *userController) Save(c *gin.Context) {
 }
 
 func (uc *userController) Update(c *gin.Context) {
-	authHeader := c.GetHeader("Authorization")
 
 	userReq := userModel.User{}
 	err := c.BindJSON(&userReq)
@@ -90,11 +78,6 @@ func (uc *userController) Update(c *gin.Context) {
 		return
 	}
 	userReq.ID = c.Query("id")
-
-	loged := uc.loginWithToken(c, userReq.Username, authHeader)
-	if !loged {
-		return
-	}
 
 	user, err := uc.service.Update(c, userReq)
 	if err != nil {
@@ -114,13 +97,7 @@ func (uc *userController) Update(c *gin.Context) {
 }
 
 func (uc *userController) Delete(c *gin.Context) {
-	authHeader := c.GetHeader("Authorization")
 	username := c.Query("username")
-
-	loged := uc.loginWithToken(c, username, authHeader)
-	if !loged {
-		return
-	}
 
 	err := uc.service.Delete(c, username)
 	if err != nil {
@@ -129,21 +106,4 @@ func (uc *userController) Delete(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, dto.OkResponse("User successfully deleted", nil))
-}
-
-func (uc *userController) loginWithToken(c *gin.Context, username, authHeader string) bool {
-	valid, err := uc.jwt.ValidateToken(username, authHeader)
-	if !valid {
-		c.Header("Authorization", "")
-
-		if err != nil {
-			c.Error(err)
-		} else {
-			c.Error(errors.New("invalid token"))
-		}
-
-		return false
-	}
-
-	return true
 }
