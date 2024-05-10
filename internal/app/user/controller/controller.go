@@ -11,11 +11,18 @@ import (
 )
 
 type UserController interface {
+	GetUser(c *gin.Context)
 	Login(c *gin.Context)
 	Save(c *gin.Context)
 	Update(c *gin.Context)
 	Delete(c *gin.Context)
+	RefreshToken(c *gin.Context)
 }
+
+const refreshTokenName string = "refresh_token"
+const accessTokenName string = "access_token"
+const expireAccessTokenInSeconds int64 = 1800
+const expireRefreshTokenInSeconds int64 = 86400
 
 type userController struct {
 	service userService.UserService
@@ -24,6 +31,10 @@ type userController struct {
 
 func NewUserController(s userService.UserService) *userController {
 	return &userController{service: s}
+}
+
+func (uc *userController) GetUser(c *gin.Context) {
+
 }
 
 func (uc *userController) Login(c *gin.Context) {
@@ -40,16 +51,21 @@ func (uc *userController) Login(c *gin.Context) {
 		return
 	}
 
-	token, err := jwt.GetJWTWrapper().GenerateJWT(user.Username)
+	accessToken, err := jwt.GetJWTWrapper().GenerateJWT(user.Username, expireAccessTokenInSeconds)
 	if err != nil {
 		c.Error(err)
 		return
 	}
 
-	userResponse := dto.NewUserResponseFromModel(*user)
+	refreshToken, err := jwt.GetJWTWrapper().GenerateJWT(user.Username, expireRefreshTokenInSeconds)
+	if err != nil {
+		c.Error(err)
+		return
+	}
 
-	c.Header("Authorization", token)
-	c.JSON(http.StatusOK, dto.OkResponse("Login with success", userResponse))
+	c.Header("Authorization", accessToken)
+	c.SetCookie(refreshTokenName, refreshToken, int(expireRefreshTokenInSeconds), "/", "localhost", false, true)
+	c.JSON(http.StatusOK, dto.OkResponse("Login with success", gin.H{"access_token": accessToken}))
 }
 
 func (uc *userController) Save(c *gin.Context) {
@@ -85,14 +101,22 @@ func (uc *userController) Update(c *gin.Context) {
 		return
 	}
 
-	token, err := uc.jwt.GenerateJWT(user.Username)
+	accessToken, err := jwt.GetJWTWrapper().GenerateJWT(user.Username, expireAccessTokenInSeconds)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
+	refreshToken, err := jwt.GetJWTWrapper().GenerateJWT(user.Username, expireRefreshTokenInSeconds)
 	if err != nil {
 		c.Error(err)
 		return
 	}
 
 	userResponse := dto.NewUserResponseFromModel(*user)
-	c.Header("Authorization", token)
+
+	c.Header("Authorization", accessToken)
+	c.SetCookie(refreshTokenName, refreshToken, int(expireRefreshTokenInSeconds), "/", "localhost", false, true)
 	c.JSON(http.StatusOK, dto.OkResponse("User successfully updated", userResponse))
 }
 
@@ -105,5 +129,36 @@ func (uc *userController) Delete(c *gin.Context) {
 		return
 	}
 
+	c.Header("Authorization", "")
+	c.SetCookie(refreshTokenName, "", 0, "/", "localhost", false, true)
 	c.JSON(http.StatusOK, dto.OkResponse("User successfully deleted", nil))
+}
+
+func (uc *userController) RefreshToken(c *gin.Context) {
+	cookie, err := c.Request.Cookie(accessTokenName)
+	if err != nil || len(cookie.Value) <= 0 {
+		c.Error(err)
+		return
+	}
+
+	valid, username, err := jwt.GetJWTWrapper().ValidateRefreshToken(cookie.Value)
+	if !valid {
+		c.Error(err)
+		return
+	}
+
+	accessToken, err := jwt.GetJWTWrapper().GenerateJWT(username, expireAccessTokenInSeconds)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
+	refreshToken, err := jwt.GetJWTWrapper().GenerateJWT(username, expireRefreshTokenInSeconds)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
+	c.SetCookie(refreshTokenName, refreshToken, int(expireRefreshTokenInSeconds), "/", "localhost", false, true)
+	c.JSON(http.StatusOK, dto.OkResponse("Login with success", gin.H{"access_token": accessToken}))
 }

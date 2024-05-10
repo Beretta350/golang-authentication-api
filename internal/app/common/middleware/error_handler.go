@@ -7,6 +7,7 @@ import (
 	"github.com/Beretta350/authentication/internal/pkg/dto"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"github.com/golang-jwt/jwt"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -29,8 +30,14 @@ func GlobalErrorHandler() gin.HandlerFunc {
 			response = dto.UnauthorizedResponse("Invalid username or password", nil)
 		default:
 			response = dto.InternalErrorResponse(err.Error(), nil)
+
+			if _, ok := err.(*jwt.ValidationError); ok {
+				response = dto.UnauthorizedResponse("Invalid JWT token", err)
+			}
 		}
+
 		c.JSON(response.StatusCode, response)
+		c.Abort()
 	}
 }
 

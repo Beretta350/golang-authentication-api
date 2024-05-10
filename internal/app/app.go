@@ -6,7 +6,6 @@ import (
 	"log"
 
 	"github.com/Beretta350/authentication/config"
-	commonController "github.com/Beretta350/authentication/internal/app/common/controller"
 	"github.com/Beretta350/authentication/internal/app/common/router"
 	userController "github.com/Beretta350/authentication/internal/app/user/controller"
 	userRepo "github.com/Beretta350/authentication/internal/app/user/repository"
@@ -33,12 +32,10 @@ func Run(env string) {
 	userService := userService.NewUserService(userRepo)
 
 	//controllers
-	csrfController := commonController.NewCSRFController()
 	userController := userController.NewUserController(userService)
 
 	//routes
 	web := router.Setup(cfg)
-	web = router.SetupCSRFRoutes(web, csrfController)
 	web = router.SetupUserRoutes(web, userController)
 
 	//run

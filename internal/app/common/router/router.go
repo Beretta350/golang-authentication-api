@@ -6,10 +6,8 @@ import (
 	"os"
 
 	"github.com/Beretta350/authentication/config"
-	commonController "github.com/Beretta350/authentication/internal/app/common/controller"
 	"github.com/Beretta350/authentication/internal/app/common/middleware"
 	userController "github.com/Beretta350/authentication/internal/app/user/controller"
-	"github.com/Beretta350/authentication/pkg/csrf"
 	"github.com/Beretta350/authentication/pkg/jwt"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -39,12 +37,10 @@ func Setup(cfg *config.Configuration) *gin.Engine {
 	corsConfig := cors.DefaultConfig()
 	corsConfig.AllowOrigins = []string{"http://localhost:8080"}
 
-	csrfWrap := csrf.NewCSRFWrapper(cfg.CSRFSecret, []string{})
-	jwtWrap := jwt.NewJWTWrapper(cfg.JWTSecret, []string{"/login"})
+	jwtWrap := jwt.NewJWTWrapper(cfg.JWTSecret, []string{"/login", "/save", "/refresh"})
 
 	app.Use(gin.Recovery())
 	app.Use(cors.New(corsConfig))
-	app.Use(middleware.CSRFHandler(csrfWrap))
 	app.Use(middleware.JWTHandler(jwtWrap))
 	app.Use(middleware.GlobalErrorHandler())
 
@@ -53,14 +49,10 @@ func Setup(cfg *config.Configuration) *gin.Engine {
 }
 
 func SetupUserRoutes(engine *gin.Engine, controller userController.UserController) *gin.Engine {
+	engine.GET("/refresh", controller.RefreshToken)
 	engine.POST("/login", controller.Login)
 	engine.POST("/save", controller.Save)
 	engine.PUT("/update", controller.Update)
 	engine.DELETE("/delete", controller.Delete)
-	return engine
-}
-
-func SetupCSRFRoutes(engine *gin.Engine, controller commonController.CSRFController) *gin.Engine {
-	engine.GET("/csrf", controller.GetToken)
 	return engine
 }

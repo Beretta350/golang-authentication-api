@@ -9,10 +9,10 @@ import (
 )
 
 type JWTWrapper interface {
-	GenerateJWT(username string) (string, error)
-	ValidateToken(username string, tokenString string) (bool, error)
+	GenerateJWT(username string, expire int64) (string, error)
+	ValidateAccessToken(username string, tokenString string) (bool, error)
+	ValidateRefreshToken(tokenString string) (bool, string, error)
 	IsIgnoredPath(path string) bool
-	SetSecretKey(secret string)
 }
 
 var instance *jwtWrapper
@@ -35,11 +35,11 @@ func GetJWTWrapper() *jwtWrapper {
 	return instance
 }
 
-func (wrap *jwtWrapper) GenerateJWT(username string) (string, error) {
+func (wrap *jwtWrapper) GenerateJWT(username string, expire int64) (string, error) {
 
 	claims := jwt.MapClaims{
 		"username": username,
-		"exp":      time.Now().Add(time.Minute * 30).Unix(),
+		"exp":      time.Now().Add(time.Second * time.Duration(expire)).Unix(),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -52,7 +52,7 @@ func (wrap *jwtWrapper) GenerateJWT(username string) (string, error) {
 	return tokenString, nil
 }
 
-func (wrap *jwtWrapper) ValidateToken(username string, tokenString string) (bool, error) {
+func (wrap *jwtWrapper) ValidateAccessToken(username string, tokenString string) (bool, error) {
 	if len(tokenString) <= 0 {
 		return false, nil
 	}
@@ -68,10 +68,22 @@ func (wrap *jwtWrapper) ValidateToken(username string, tokenString string) (bool
 	return token.Valid && token.Claims.(jwt.MapClaims)["username"] == username, nil
 }
 
-func (wrap *jwtWrapper) IsIgnoredPath(path string) bool {
-	return util.InArray(wrap.ignorePaths, path)
+func (wrap *jwtWrapper) ValidateRefreshToken(tokenString string) (bool, string, error) {
+	if len(tokenString) <= 0 {
+		return false, "", nil
+	}
+
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		return []byte(wrap.secretKey), nil
+	})
+
+	if err != nil {
+		return false, "", err
+	}
+
+	return token.Valid, token.Claims.(jwt.MapClaims)["username"].(string), nil
 }
 
-func (wrap *jwtWrapper) SetSecretKey(secret string) {
-	wrap.secretKey = secret
+func (wrap *jwtWrapper) IsIgnoredPath(path string) bool {
+	return util.InArray(wrap.ignorePaths, path)
 }
