@@ -21,8 +21,8 @@ type UserController interface {
 
 const refreshTokenName string = "refresh_token"
 const accessTokenName string = "access_token"
-const expireAccessTokenInSeconds int64 = 1800
-const expireRefreshTokenInSeconds int64 = 86400
+const expireAccessTokenInSeconds int64 = 1800   //30 min
+const expireRefreshTokenInSeconds int64 = 86400 //24 hours
 
 type userController struct {
 	service userService.UserService
