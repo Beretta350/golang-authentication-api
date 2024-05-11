@@ -12,9 +12,10 @@ import (
 
 type UserRepository interface {
 	Save(ctx context.Context, user *userModel.User) error
-	Update(ctx context.Context, user *userModel.User) (*userModel.User, error)
+	Update(ctx context.Context, user *userModel.User) error
 	Delete(ctx context.Context, user *userModel.User) error
 	FindByUsername(ctx context.Context, username string) (*userModel.User, error)
+	FindByID(ctx context.Context, id string) (*userModel.User, error)
 }
 
 type userRepository struct {
@@ -37,7 +38,7 @@ func (ur *userRepository) Save(ctx context.Context, user *userModel.User) error 
 	return nil
 }
 
-func (ur *userRepository) Update(ctx context.Context, user *userModel.User) (*userModel.User, error) {
+func (ur *userRepository) Update(ctx context.Context, user *userModel.User) error {
 	filter := bson.M{"_id": user.ID, "username": user.Username}
 	update := bson.M{"$set": user}
 
@@ -45,14 +46,14 @@ func (ur *userRepository) Update(ctx context.Context, user *userModel.User) (*us
 
 	result, err := ur.collection.UpdateOne(ctx, filter, update)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	if result.ModifiedCount <= 0 {
-		return nil, errors.New("no updated users")
+		return errors.New("no updated users")
 	}
 
-	return user, nil
+	return nil
 }
 
 func (ur *userRepository) Delete(ctx context.Context, user *userModel.User) error {
@@ -67,6 +68,19 @@ func (ur *userRepository) Delete(ctx context.Context, user *userModel.User) erro
 func (ur *userRepository) FindByUsername(ctx context.Context, username string) (*userModel.User, error) {
 	var user userModel.User
 	filter := bson.M{"username": username}
+	err := ur.collection.FindOne(ctx, filter).Decode(&user)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &user, nil
+}
+
+func (ur *userRepository) FindByID(ctx context.Context, id string) (*userModel.User, error) {
+	var user userModel.User
+	filter := bson.M{"_id": id}
 	err := ur.collection.FindOne(ctx, filter).Decode(&user)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
