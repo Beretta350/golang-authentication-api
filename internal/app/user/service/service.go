@@ -9,7 +9,7 @@ import (
 )
 
 type UserService interface {
-	GetUser(ctx context.Context, userReq model.User) (*model.User, error)
+	GetUserByID(ctx context.Context, id string) (*model.User, error)
 	Login(ctx context.Context, userReq model.User) (*model.User, error)
 	Save(ctx context.Context, userReq model.User) error
 	Update(ctx context.Context, userReq model.User) error
@@ -24,9 +24,9 @@ func NewUserService(r userRepo.UserRepository) *userService {
 	return &userService{repo: r}
 }
 
-func (us *userService) GetUser(ctx context.Context, userReq model.User) (*model.User, error) {
+func (us *userService) GetUserByID(ctx context.Context, id string) (*model.User, error) {
 	//Find
-	user, err := us.repo.FindByUsername(ctx, userReq.Username)
+	user, err := us.repo.FindByID(ctx, id)
 	if err != nil {
 		return nil, err
 	}

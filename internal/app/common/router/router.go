@@ -50,6 +50,7 @@ func Setup(cfg *config.Configuration) *gin.Engine {
 
 func SetupUserRoutes(engine *gin.Engine, controller userController.UserController) *gin.Engine {
 	engine.GET("/refresh", controller.RefreshToken)
+	engine.GET("/user", controller.GetUserByID)
 	engine.POST("/login", controller.Login)
 	engine.POST("/save", controller.Save)
 	engine.PUT("/update", controller.Update)

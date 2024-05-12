@@ -35,11 +35,11 @@ func GetJWTWrapper() *jwtWrapper {
 	return instance
 }
 
-func (wrap *jwtWrapper) GenerateJWT(username string, expire int64) (string, error) {
+func (wrap *jwtWrapper) GenerateJWT(userId string, expire int64) (string, error) {
 
 	claims := jwt.MapClaims{
-		"username": username,
-		"exp":      time.Now().Add(time.Second * time.Duration(expire)).Unix(),
+		"id":  userId,
+		"exp": time.Now().Add(time.Second * time.Duration(expire)).Unix(),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -52,7 +52,7 @@ func (wrap *jwtWrapper) GenerateJWT(username string, expire int64) (string, erro
 	return tokenString, nil
 }
 
-func (wrap *jwtWrapper) ValidateAccessToken(username string, tokenString string) (bool, error) {
+func (wrap *jwtWrapper) ValidateAccessToken(userId string, tokenString string) (bool, error) {
 	if len(tokenString) <= 0 {
 		return false, nil
 	}
@@ -65,7 +65,7 @@ func (wrap *jwtWrapper) ValidateAccessToken(username string, tokenString string)
 		return false, err
 	}
 
-	return token.Valid && token.Claims.(jwt.MapClaims)["username"] == username, nil
+	return token.Valid && token.Claims.(jwt.MapClaims)["id"] == userId, nil
 }
 
 func (wrap *jwtWrapper) ValidateRefreshToken(tokenString string) (bool, string, error) {
@@ -81,7 +81,7 @@ func (wrap *jwtWrapper) ValidateRefreshToken(tokenString string) (bool, string, 
 		return false, "", err
 	}
 
-	return token.Valid, token.Claims.(jwt.MapClaims)["username"].(string), nil
+	return token.Valid, token.Claims.(jwt.MapClaims)["id"].(string), nil
 }
 
 func (wrap *jwtWrapper) IsIgnoredPath(path string) bool {

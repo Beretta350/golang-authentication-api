@@ -13,19 +13,16 @@ func JWTHandler(wrapper jwt.JWTWrapper) gin.HandlerFunc {
 			return
 		}
 
-		var requestBody struct {
-			Username string `json:"username"`
-		}
-
-		if err := c.ShouldBindJSON(&requestBody); err != nil {
-			defaultJWTErrorFunc(c, err)
+		userId := c.Query("id")
+		if len(userId) <= 0 {
+			defaultJWTErrorFunc(c, nil)
 			return
 		}
 
-		valid, err := wrapper.ValidateAccessToken(requestBody.Username, c.GetHeader("Authorization"))
+		valid, _ := wrapper.ValidateAccessToken(userId, c.GetHeader("Authorization"))
 		if !valid {
 			c.Header("Authorization", "")
-			defaultJWTErrorFunc(c, err)
+			defaultJWTErrorFunc(c, nil)
 			return
 		}
 

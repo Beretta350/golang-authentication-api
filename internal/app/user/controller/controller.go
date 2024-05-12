@@ -11,7 +11,7 @@ import (
 )
 
 type UserController interface {
-	GetUser(c *gin.Context)
+	GetUserByID(c *gin.Context)
 	Login(c *gin.Context)
 	Save(c *gin.Context)
 	Update(c *gin.Context)
@@ -20,7 +20,6 @@ type UserController interface {
 }
 
 const refreshTokenName string = "refresh_token"
-const accessTokenName string = "access_token"
 const expireAccessTokenInSeconds int64 = 300    //5 min
 const expireRefreshTokenInSeconds int64 = 86400 //24 hours
 
@@ -32,15 +31,10 @@ func NewUserController(s userService.UserService) *userController {
 	return &userController{service: s}
 }
 
-func (uc *userController) GetUser(c *gin.Context) {
-	userReq := userModel.User{}
-	err := c.BindJSON(&userReq)
-	if err != nil {
-		c.Error(err)
-		return
-	}
+func (uc *userController) GetUserByID(c *gin.Context) {
+	userID := c.Query("id")
 
-	user, err := uc.service.GetUser(c, userReq)
+	user, err := uc.service.GetUserByID(c, userID)
 	if err != nil {
 		c.Error(err)
 		return
@@ -64,20 +58,20 @@ func (uc *userController) Login(c *gin.Context) {
 		return
 	}
 
-	accessToken, err := jwt.GetJWTWrapper().GenerateJWT(user.Username, expireAccessTokenInSeconds)
+	accessToken, err := jwt.GetJWTWrapper().GenerateJWT(user.ID, expireAccessTokenInSeconds)
 	if err != nil {
 		c.Error(err)
 		return
 	}
 
-	refreshToken, err := jwt.GetJWTWrapper().GenerateJWT(user.Username, expireRefreshTokenInSeconds)
+	refreshToken, err := jwt.GetJWTWrapper().GenerateJWT(user.ID, expireRefreshTokenInSeconds)
 	if err != nil {
 		c.Error(err)
 		return
 	}
 
 	c.SetCookie(refreshTokenName, refreshToken, int(expireRefreshTokenInSeconds), "/", "localhost", false, true)
-	c.JSON(http.StatusOK, dto.OkResponse("Login with success", gin.H{"access_token": accessToken}))
+	c.JSON(http.StatusOK, dto.OkResponse("Login with success", gin.H{"userId": user.ID, "access_token": accessToken}))
 }
 
 func (uc *userController) Save(c *gin.Context) {
@@ -132,30 +126,30 @@ func (uc *userController) Delete(c *gin.Context) {
 }
 
 func (uc *userController) RefreshToken(c *gin.Context) {
-	cookie, err := c.Request.Cookie(accessTokenName)
+	cookie, err := c.Request.Cookie(refreshTokenName)
 	if err != nil || len(cookie.Value) <= 0 {
 		c.Error(err)
 		return
 	}
 
-	valid, username, err := jwt.GetJWTWrapper().ValidateRefreshToken(cookie.Value)
+	valid, userId, err := jwt.GetJWTWrapper().ValidateRefreshToken(cookie.Value)
 	if !valid {
 		c.Error(err)
 		return
 	}
 
-	accessToken, err := jwt.GetJWTWrapper().GenerateJWT(username, expireAccessTokenInSeconds)
+	accessToken, err := jwt.GetJWTWrapper().GenerateJWT(userId, expireAccessTokenInSeconds)
 	if err != nil {
 		c.Error(err)
 		return
 	}
 
-	refreshToken, err := jwt.GetJWTWrapper().GenerateJWT(username, expireRefreshTokenInSeconds)
+	refreshToken, err := jwt.GetJWTWrapper().GenerateJWT(userId, expireRefreshTokenInSeconds)
 	if err != nil {
 		c.Error(err)
 		return
 	}
 
 	c.SetCookie(refreshTokenName, refreshToken, int(expireRefreshTokenInSeconds), "/", "localhost", false, true)
-	c.JSON(http.StatusOK, dto.OkResponse("Login with success", gin.H{"access_token": accessToken}))
+	c.JSON(http.StatusOK, dto.OkResponse("Success", gin.H{"access_token": accessToken}))
 }
