@@ -5,7 +5,7 @@
 ![Docker](https://img.shields.io/badge/Docker-2CA5E0?style=for-the-badge&logo=docker&logoColor=white)
 ![MongoDB](https://img.shields.io/badge/MongoDB-%234ea94b.svg?style=for-the-badge&logo=mongodb&logoColor=white)
 
-A simple lightweight authentication API built in Golang designed to be a fast and easy start for other projects. It includes JWT token generation for secure authentication, bcrypt cryptography for password hashing, and MongoDB for storing user credentials.
+A simple lightweight authentication API built in Golang designed to be a fast and easy start for other projects. It includes JWT token generation for secure authentication, bcrypt cryptography for password hashing, and MongoDB for storing user credentials. This API also tries to avoid CSRF and XSS attacks to ensure basic levels of security.
 
 ## Layout
 
