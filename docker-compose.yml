@@ -14,6 +14,8 @@ services:
             - DB_USERNAME=root
             - DB_PASSWORD=root
             - DB_DATABASE=authentication
+            - JWT_SECRET=Hxj1pW48QqcnSQAc5
+            - CSRF_SECRET=jAJvdFNPsXyWW2h9
         depends_on:
             - mongodb
         ports:

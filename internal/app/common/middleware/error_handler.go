@@ -32,10 +32,12 @@ func GlobalErrorHandler() gin.HandlerFunc {
 			response = dto.InternalErrorResponse(err.Error(), nil)
 
 			if _, ok := err.(*jwt.ValidationError); ok {
-				response = dto.UnauthorizedResponse("Invalid token", err.Error())
+				response = dto.UnauthorizedResponse("Invalid JWT token", err)
 			}
 		}
+
 		c.JSON(response.StatusCode, response)
+		c.Abort()
 	}
 }
 

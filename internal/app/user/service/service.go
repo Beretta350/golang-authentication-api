@@ -9,10 +9,11 @@ import (
 )
 
 type UserService interface {
+	GetUserByID(ctx context.Context, id string) (*model.User, error)
 	Login(ctx context.Context, userReq model.User) (*model.User, error)
-	Save(ctx context.Context, userReq model.User) (*model.User, error)
-	Update(ctx context.Context, userReq model.User) (*model.User, error)
-	Delete(ctx context.Context, username string) error
+	Save(ctx context.Context, userReq model.User) error
+	Update(ctx context.Context, userReq model.User) error
+	Delete(ctx context.Context, id string) error
 }
 
 type userService struct {
@@ -21,6 +22,16 @@ type userService struct {
 
 func NewUserService(r userRepo.UserRepository) *userService {
 	return &userService{repo: r}
+}
+
+func (us *userService) GetUserByID(ctx context.Context, id string) (*model.User, error) {
+	//Find
+	user, err := us.repo.FindByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }
 
 func (us *userService) Login(ctx context.Context, userReq model.User) (*model.User, error) {
@@ -40,55 +51,55 @@ func (us *userService) Login(ctx context.Context, userReq model.User) (*model.Us
 	return user, nil
 }
 
-func (us *userService) Save(ctx context.Context, userReq model.User) (*model.User, error) {
+func (us *userService) Save(ctx context.Context, userReq model.User) error {
 	user := model.NewUserModel(userReq.Username, userReq.Password, userReq.Roles)
 	err := user.Validate()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	encryptedData, err := crypto.EncryptPassword(user.Password)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	user.Password = string(encryptedData)
 
 	err = us.repo.Save(ctx, user)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return user, nil
+	return nil
 }
 
-func (us *userService) Update(ctx context.Context, userReq model.User) (*model.User, error) {
-	user, err := us.repo.FindByUsername(ctx, userReq.Username)
+func (us *userService) Update(ctx context.Context, userReq model.User) error {
+	user, err := us.repo.FindByID(ctx, userReq.ID)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	err = user.Validate()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	encryptedData, err := crypto.EncryptPassword(userReq.Password)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	user.Password = string(encryptedData)
 
-	updatedUser, err := us.repo.Update(ctx, user)
+	err = us.repo.Update(ctx, user)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return updatedUser, nil
+	return nil
 }
 
-func (us *userService) Delete(ctx context.Context, username string) error {
-	user, err := us.repo.FindByUsername(ctx, username)
+func (us *userService) Delete(ctx context.Context, id string) error {
+	user, err := us.repo.FindByID(ctx, id)
 	if err != nil {
 		return err
 	}

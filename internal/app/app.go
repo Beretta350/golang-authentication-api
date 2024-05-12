@@ -11,8 +11,6 @@ import (
 	userRepo "github.com/Beretta350/authentication/internal/app/user/repository"
 	userService "github.com/Beretta350/authentication/internal/app/user/service"
 	"github.com/Beretta350/authentication/internal/pkg/database"
-	"github.com/Beretta350/authentication/pkg/jwt"
-	"github.com/gin-gonic/gin"
 )
 
 func Run(env string) {
@@ -24,8 +22,6 @@ func Run(env string) {
 	cfg := config.GetConfig()
 	ctx := context.Background()
 
-	jwtWrap := jwt.NewJWTWrapper(cfg.JWTSecret)
-
 	//mongodb
 	mongodb := database.ConnectDB(ctx, cfg.Database)
 
@@ -36,12 +32,13 @@ func Run(env string) {
 	userService := userService.NewUserService(userRepo)
 
 	//controllers
-	userController := userController.NewUserController(userService, jwtWrap)
+	userController := userController.NewUserController(userService)
 
-	web := router.Setup()
+	//routes
+	web := router.Setup(cfg)
 	web = router.SetupUserRoutes(web, userController)
 
-	gin.SetMode(cfg.Server.Mode)
+	//run
 	log.Printf("Server running on port %v in %v mode\n", cfg.Server.Port, cfg.Server.Mode)
 	_ = web.Run(":" + fmt.Sprint(cfg.Server.Port))
 }

@@ -1,6 +1,9 @@
 package dto
 
-import "net/http"
+import (
+	"fmt"
+	"net/http"
+)
 
 type ResponseMessage struct {
 	StatusCode int    `json:"-"`
@@ -8,6 +11,24 @@ type ResponseMessage struct {
 	Message    string `json:"message"`
 	Data       any    `json:"data,omitempty"`
 	Errors     any    `json:"errors,omitempty"`
+}
+
+func (r *ResponseMessage) ToString() string {
+	response := "{"
+
+	response += fmt.Sprintf("\"status\": %v", r.Status)
+	response += fmt.Sprintf("\"message\": %v", r.Message)
+
+	if r.Data != nil {
+		response += fmt.Sprintf("\"data\": %v", r.Data)
+	}
+
+	if r.Errors != nil {
+		response += fmt.Sprintf("\"errors\": %v", r.Errors)
+	}
+
+	response += "}"
+	return response
 }
 
 func OkResponse(message string, data any) *ResponseMessage {
@@ -34,6 +55,16 @@ func UnauthorizedResponse(message string, errs any) *ResponseMessage {
 	return newResponseMessage(
 		http.StatusUnauthorized,
 		http.StatusText(http.StatusUnauthorized),
+		message,
+		nil,
+		errs,
+	)
+}
+
+func ForbiddenResponse(message string, errs any) *ResponseMessage {
+	return newResponseMessage(
+		http.StatusForbidden,
+		http.StatusText(http.StatusForbidden),
 		message,
 		nil,
 		errs,
