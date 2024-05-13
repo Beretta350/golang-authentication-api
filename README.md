@@ -45,7 +45,7 @@ Use the API endpoints to manage your users effectively.
 ## Example API Endpoints
 - `GET /user?id=<userId>`: Get user infos.
 - `GET /refreshToken`: Refresh access token using refresh token.
-- `POST /login`: Login with user credentials.
+- `POST /login`: Login with user credentials (returns JWT with user ID claim).
 - `POST /save`: Create a new user.
 - `PUT /update?id=<userId>`: Update user data.
 - `DELETE /delete?id=<userId>`: Delete user.
