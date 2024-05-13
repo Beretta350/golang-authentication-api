@@ -71,7 +71,7 @@ func (uc *userController) Login(c *gin.Context) {
 	}
 
 	c.SetCookie(refreshTokenName, refreshToken, int(expireRefreshTokenInSeconds), "/", "localhost", false, true)
-	c.JSON(http.StatusOK, dto.OkResponse("Login with success", gin.H{"userId": user.ID, "access_token": accessToken}))
+	c.JSON(http.StatusOK, dto.OkResponse("Login with success", gin.H{"access_token": accessToken}))
 }
 
 func (uc *userController) Save(c *gin.Context) {
