@@ -54,6 +54,6 @@ Use the API endpoints to manage your users effectively.
 
 ## Contributions
 
-We welcome contributions to this To-Do List application backend. If you're interested in enhancing or extending its functionality, feel free to create pull requests or open issues on the repository.
+We welcome contributions to this authentication api. If you're interested in enhancing or extending its functionality, feel free to create pull requests or open issues on the repository.
 
-Enjoy using this flexible To-Do List backend built with Golang and Hexagonal Architecture!
+Enjoy using this simple lightweight authentication API built with Golang and Gin!
