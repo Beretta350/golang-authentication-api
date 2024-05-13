@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 
 	"github.com/Beretta350/authentication/internal/app/user/model"
 	userRepo "github.com/Beretta350/authentication/internal/app/user/repository"
@@ -40,6 +41,10 @@ func (us *userService) Login(ctx context.Context, userReq model.User) (*model.Us
 	user, err := us.repo.FindByUsername(ctx, userReq.Username)
 	if err != nil {
 		return nil, err
+	}
+
+	if user == nil {
+		return nil, errors.New("invalid username or password")
 	}
 
 	//Check password
