@@ -16,18 +16,31 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func TestAuthenticationAPI(t *testing.T) {
+func Test_AuthenticationAPIUserCreation(t *testing.T) {
 	ctx := context.Background()
 
 	mongoContainer, mongoIp, mongoPort := startMongoContainer(t, ctx)
 	apiContainer, _, apiPort := startAPIContainer(t, ctx, mongoIp)
 	mongoClient := newMongoClient(t, ctx, mongoPort)
 
+	defer func() {
+		mongoClient.Disconnect(ctx)
+		apiContainer.Terminate(ctx)
+		mongoContainer.Terminate(ctx)
+	}()
+
+	createUserHappyPathSubtest(t, ctx, apiPort, mongoClient)
+	createUserUsernameSubtests(t, ctx, apiPort, mongoClient)
+	createUserPasswordSubtests(t, ctx, apiPort, mongoClient)
+	createUserRoleSubtests(t, ctx, apiPort, mongoClient)
+}
+
+func createUserHappyPathSubtest(t *testing.T, ctx context.Context, apiPort string, mongoClient *mongo.Client) {
 	t.Run("Creating new user happy path", func(t *testing.T) {
 		url := fmt.Sprintf("http://localhost:%s/save", apiPort)
 		jsonStr := []byte(
 			`{
-				"username":"someone",
+				"username":"happypath",
 				"password": "ABCD1234",
 				"roles": ["USER"]
 			}`,
@@ -47,22 +60,159 @@ func TestAuthenticationAPI(t *testing.T) {
 		assert.NoError(t, err)
 
 		user := model.User{}
-		filter := bson.M{"username": "someone"}
+		filter := bson.M{"username": "happypath"}
 		err = mongoClient.Database("authentication").Collection("user").FindOne(ctx, filter).Decode(&user)
 		assert.NoError(t, err)
 
-		assert.Equal(t, user.Username, "someone")
+		assert.Equal(t, user.Username, "happypath")
 		assert.Equal(t, user.Roles, []string{"USER"})
 	})
+}
 
-	err := mongoClient.Disconnect(ctx)
-	assert.NoError(t, err)
+func createUserUsernameSubtests(t *testing.T, ctx context.Context, apiPort string, mongoClient *mongo.Client) {
+	t.Run("Create new user with no username", func(t *testing.T) {
+		url := fmt.Sprintf("http://localhost:%s/save", apiPort)
+		jsonStr := []byte(
+			`{
+				"password": "ABCD12345",
+				"roles": ["USER"]
+			}`,
+		)
 
-	err = apiContainer.Terminate(ctx)
-	assert.NoError(t, err)
+		req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
+		assert.NoError(t, err)
 
-	err = mongoContainer.Terminate(ctx)
-	assert.NoError(t, err)
+		req.Header.Set("Content-Type", "application/json")
+
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		assert.NoError(t, err)
+
+		assert.Equal(t, resp.StatusCode, http.StatusBadRequest)
+		err = resp.Body.Close()
+		assert.NoError(t, err)
+
+		user := model.User{}
+		filter := bson.M{"username": ""}
+		err = mongoClient.Database("authentication").Collection("user").FindOne(ctx, filter).Decode(&user)
+		assert.ErrorIs(t, err, mongo.ErrNoDocuments)
+	})
+}
+
+func createUserPasswordSubtests(t *testing.T, ctx context.Context, apiPort string, mongoClient *mongo.Client) {
+	t.Run("Create new user with no password", func(t *testing.T) {
+		url := fmt.Sprintf("http://localhost:%s/save", apiPort)
+		jsonStr := []byte(
+			`{
+				"username":"wrongpassword",
+				"roles": ["USER"]
+			}`,
+		)
+
+		req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
+		assert.NoError(t, err)
+
+		req.Header.Set("Content-Type", "application/json")
+
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		assert.NoError(t, err)
+
+		assert.Equal(t, resp.StatusCode, http.StatusBadRequest)
+		err = resp.Body.Close()
+		assert.NoError(t, err)
+
+		user := model.User{}
+		filter := bson.M{"username": "wrongpassword"}
+		err = mongoClient.Database("authentication").Collection("user").FindOne(ctx, filter).Decode(&user)
+		assert.ErrorIs(t, err, mongo.ErrNoDocuments)
+	})
+	t.Run("Create new user with less than 8 characters in the password", func(t *testing.T) {
+		url := fmt.Sprintf("http://localhost:%s/save", apiPort)
+		jsonStr := []byte(
+			`{
+				"username":"wrongpassword",
+				"password": "ABC",
+				"roles": ["USER"]
+			}`,
+		)
+
+		req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
+		assert.NoError(t, err)
+
+		req.Header.Set("Content-Type", "application/json")
+
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		assert.NoError(t, err)
+
+		assert.Equal(t, resp.StatusCode, http.StatusBadRequest)
+		err = resp.Body.Close()
+		assert.NoError(t, err)
+
+		user := model.User{}
+		filter := bson.M{"username": "wrongpassword"}
+		err = mongoClient.Database("authentication").Collection("user").FindOne(ctx, filter).Decode(&user)
+		assert.ErrorIs(t, err, mongo.ErrNoDocuments)
+	})
+}
+
+func createUserRoleSubtests(t *testing.T, ctx context.Context, apiPort string, mongoClient *mongo.Client) {
+	t.Run("Create new user with wrong roles", func(t *testing.T) {
+		url := fmt.Sprintf("http://localhost:%s/save", apiPort)
+		jsonStr := []byte(
+			`{
+				"username":"wrongrole",
+				"password": "ABCDE123456",
+				"roles": ["WROONG"]
+			}`,
+		)
+
+		req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
+		assert.NoError(t, err)
+
+		req.Header.Set("Content-Type", "application/json")
+
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		assert.NoError(t, err)
+
+		assert.Equal(t, resp.StatusCode, http.StatusBadRequest)
+		err = resp.Body.Close()
+		assert.NoError(t, err)
+
+		user := model.User{}
+		filter := bson.M{"username": "wrongrole"}
+		err = mongoClient.Database("authentication").Collection("user").FindOne(ctx, filter).Decode(&user)
+		assert.ErrorIs(t, err, mongo.ErrNoDocuments)
+	})
+	t.Run("Create new user with no roles", func(t *testing.T) {
+		url := fmt.Sprintf("http://localhost:%s/save", apiPort)
+		jsonStr := []byte(
+			`{
+				"username":"wrongrole",
+				"password": "ABCDE123456"
+			}`,
+		)
+
+		req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
+		assert.NoError(t, err)
+
+		req.Header.Set("Content-Type", "application/json")
+
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		assert.NoError(t, err)
+
+		assert.Equal(t, resp.StatusCode, http.StatusBadRequest)
+		err = resp.Body.Close()
+		assert.NoError(t, err)
+
+		user := model.User{}
+		filter := bson.M{"username": "wrongrole"}
+		err = mongoClient.Database("authentication").Collection("user").FindOne(ctx, filter).Decode(&user)
+		assert.ErrorIs(t, err, mongo.ErrNoDocuments)
+	})
 }
 
 func startAPIContainer(t *testing.T, ctx context.Context, mongoHost string) (testcontainers.Container, string, string) {
@@ -79,7 +229,9 @@ func startAPIContainer(t *testing.T, ctx context.Context, mongoHost string) (tes
 			"DB_DATABASE": "authentication",
 			"JWT_SECRET":  "Hxj1pW48QqcnSQAc5",
 		},
-		Image:        "authentication-api",
+		FromDockerfile: testcontainers.FromDockerfile{
+			Context: "..",
+		},
 		ExposedPorts: []string{"8080/tcp"},
 		WaitingFor:   wait.ForListeningPort("8080/tcp"),
 	}
