@@ -5,10 +5,10 @@ import (
 	"strings"
 
 	"github.com/Beretta350/authentication/internal/pkg/dto"
+	"github.com/Beretta350/authentication/internal/pkg/errs"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/golang-jwt/jwt"
-	"golang.org/x/crypto/bcrypt"
 )
 
 func GlobalErrorHandler() gin.HandlerFunc {
@@ -26,8 +26,7 @@ func GlobalErrorHandler() gin.HandlerFunc {
 		switch {
 		case errors.As(err, &validationErrors):
 			response = multipleErrorMessages(validationErrors)
-		case errors.Is(err, bcrypt.ErrMismatchedHashAndPassword):
-		case err.Error() == "invalid username or password":
+		case errors.Is(err, errs.ErrUsernameOrPasswordMismatch):
 			response = dto.UnauthorizedResponse("Invalid username or password", nil)
 		default:
 			response = dto.InternalErrorResponse(err.Error(), nil)

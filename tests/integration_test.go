@@ -3,11 +3,14 @@ package tests
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"testing"
 
 	"github.com/Beretta350/authentication/internal/app/user/model"
+	"github.com/Beretta350/authentication/internal/pkg/dto"
 	"github.com/stretchr/testify/assert"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
@@ -33,6 +36,125 @@ func Test_AuthenticationAPIUserCreation(t *testing.T) {
 	createUserUsernameSubtests(t, ctx, apiPort, mongoClient)
 	createUserPasswordSubtests(t, ctx, apiPort, mongoClient)
 	createUserRoleSubtests(t, ctx, apiPort, mongoClient)
+}
+
+func Test_AuthenticationAPIUserLogin(t *testing.T) {
+	ctx := context.Background()
+
+	mongoContainer, mongoIp, mongoPort := startMongoContainer(t, ctx)
+	apiContainer, _, apiPort := startAPIContainer(t, ctx, mongoIp)
+	mongoClient := newMongoClient(t, ctx, mongoPort)
+
+	defer func() {
+		mongoClient.Disconnect(ctx)
+		apiContainer.Terminate(ctx)
+		mongoContainer.Terminate(ctx)
+	}()
+
+	//Create the user to make login
+	createUserHappyPathSubtest(t, ctx, apiPort, mongoClient)
+	loginUserHappyPathSubtest(t, ctx, apiPort, mongoClient)
+	loginUserUsernameSubtest(t, ctx, apiPort, mongoClient)
+	loginUserPasswordSubtest(t, ctx, apiPort, mongoClient)
+}
+
+func loginUserHappyPathSubtest(t *testing.T, ctx context.Context, apiPort string, mongoClient *mongo.Client) {
+	t.Run("Login user happy path", func(t *testing.T) {
+		url := fmt.Sprintf("http://localhost:%s/login", apiPort)
+		jsonStr := []byte(
+			`{
+				"username":"happypath",
+				"password": "ABCD1234"
+			}`,
+		)
+
+		req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
+		assert.NoError(t, err)
+
+		req.Header.Set("Content-Type", "application/json")
+
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		assert.NoError(t, err)
+
+		bodyBytes, err := io.ReadAll(resp.Body)
+		assert.NoError(t, err)
+
+		body := dto.ResponseMessage{}
+		err = json.Unmarshal(bodyBytes, &body)
+		assert.NoError(t, err)
+
+		assert.Equal(t, resp.StatusCode, http.StatusOK)
+		assert.Equal(t, "Login with success", body.Message)
+		err = resp.Body.Close()
+		assert.NoError(t, err)
+	})
+}
+
+func loginUserUsernameSubtest(t *testing.T, ctx context.Context, apiPort string, mongoClient *mongo.Client) {
+	t.Run("Login user wrong username", func(t *testing.T) {
+		url := fmt.Sprintf("http://localhost:%s/login", apiPort)
+		jsonStr := []byte(
+			`{
+				"username":"happypath",
+				"password": "12345ABCD"
+			}`,
+		)
+
+		req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
+		assert.NoError(t, err)
+
+		req.Header.Set("Content-Type", "application/json")
+
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		assert.NoError(t, err)
+
+		bodyBytes, err := io.ReadAll(resp.Body)
+		assert.NoError(t, err)
+
+		body := dto.ResponseMessage{}
+		err = json.Unmarshal(bodyBytes, &body)
+		assert.NoError(t, err)
+
+		assert.Equal(t, resp.StatusCode, http.StatusUnauthorized)
+		assert.Equal(t, "Invalid username or password", body.Message)
+		err = resp.Body.Close()
+		assert.NoError(t, err)
+	})
+}
+
+func loginUserPasswordSubtest(t *testing.T, ctx context.Context, apiPort string, mongoClient *mongo.Client) {
+	t.Run("Login user wrong password", func(t *testing.T) {
+		url := fmt.Sprintf("http://localhost:%s/login", apiPort)
+		jsonStr := []byte(
+			`{
+				"username":"wroong",
+				"password": "ABCD1234"
+			}`,
+		)
+
+		req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
+		assert.NoError(t, err)
+
+		req.Header.Set("Content-Type", "application/json")
+
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		assert.NoError(t, err)
+
+		bodyBytes, err := io.ReadAll(resp.Body)
+		assert.NoError(t, err)
+
+		body := dto.ResponseMessage{}
+		err = json.Unmarshal(bodyBytes, &body)
+		assert.NoError(t, err)
+
+		assert.Equal(t, resp.StatusCode, http.StatusUnauthorized)
+		assert.Equal(t, "Invalid username or password", body.Message)
+		err = resp.Body.Close()
+		assert.NoError(t, err)
+	})
 }
 
 func createUserHappyPathSubtest(t *testing.T, ctx context.Context, apiPort string, mongoClient *mongo.Client) {

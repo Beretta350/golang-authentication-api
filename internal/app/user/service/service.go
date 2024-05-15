@@ -2,11 +2,11 @@ package service
 
 import (
 	"context"
-	"errors"
 
 	"github.com/Beretta350/authentication/internal/app/user/model"
 	userRepo "github.com/Beretta350/authentication/internal/app/user/repository"
 	"github.com/Beretta350/authentication/internal/pkg/crypto"
+	"github.com/Beretta350/authentication/internal/pkg/errs"
 )
 
 type UserService interface {
@@ -40,17 +40,17 @@ func (us *userService) Login(ctx context.Context, userReq model.User) (*model.Us
 	//Find
 	user, err := us.repo.FindByUsername(ctx, userReq.Username)
 	if err != nil {
-		return nil, err
+		return nil, errs.ErrUsernameOrPasswordMismatch
 	}
 
 	if user == nil {
-		return nil, errors.New("invalid username or password")
+		return nil, errs.ErrUsernameOrPasswordMismatch
 	}
 
 	//Check password
 	err = crypto.CheckPassword(userReq.Password, []byte(user.Password))
 	if err != nil {
-		return nil, err
+		return nil, errs.ErrUsernameOrPasswordMismatch
 	}
 
 	return user, nil
