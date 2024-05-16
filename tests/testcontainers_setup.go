@@ -49,7 +49,7 @@ func startAPIContainer(t *testing.T, ctx context.Context, mongoHost string) (tes
 			"JWT_SECRET":  "Hxj1pW48QqcnSQAc5",
 		},
 		FromDockerfile: testcontainers.FromDockerfile{
-			Context: "..",
+			Context: "../../",
 		},
 		ExposedPorts: []string{"8080/tcp"},
 		WaitingFor:   wait.ForListeningPort("8080/tcp"),
