@@ -14,7 +14,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func Test_AuthenticationAPIGetUser(t *testing.T) {
+func TestAuthenticationAPI_GetUser(t *testing.T) {
 	ctx := context.Background()
 
 	containers := tests.SetupContainers(t, ctx)
@@ -28,8 +28,6 @@ func Test_AuthenticationAPIGetUser(t *testing.T) {
 	getUserNoHeaderSubtest(t, ctx, containers.ApiPort, containers.MongoClient)
 	getUserWrongIdSubtest(t, ctx, containers.ApiPort, containers.MongoClient)
 }
-
-var accessToken string
 
 func getUserHappyPathSubtest(t *testing.T, ctx context.Context, apiPort string, mongoClient *mongo.Client) {
 	t.Run("Get user happy path", func(t *testing.T) {

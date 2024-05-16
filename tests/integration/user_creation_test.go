@@ -14,7 +14,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func Test_AuthenticationAPIUserCreation(t *testing.T) {
+func TestAuthenticationAPIUser_Creation(t *testing.T) {
 	ctx := context.Background()
 
 	containers := tests.SetupContainers(t, ctx)

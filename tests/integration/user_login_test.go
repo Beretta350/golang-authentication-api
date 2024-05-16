@@ -15,7 +15,9 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func Test_AuthenticationAPIUserLogin(t *testing.T) {
+var accessToken string
+
+func TestAuthenticationAPIUser_Login(t *testing.T) {
 	ctx := context.Background()
 
 	containers := tests.SetupContainers(t, ctx)
@@ -124,7 +126,7 @@ func loginUserPasswordSubtest(t *testing.T, ctx context.Context, apiPort string,
 		assert.NoError(t, err)
 
 		assert.Equal(t, resp.StatusCode, http.StatusUnauthorized)
-		assert.Equal(t, "Invalid username or password", body.Message)
+		assert.Equal(t, "invalid username or password", body.Message)
 		err = resp.Body.Close()
 		assert.NoError(t, err)
 	})
