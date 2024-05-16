@@ -78,23 +78,30 @@ func (us *userService) Save(ctx context.Context, userReq model.User) error {
 }
 
 func (us *userService) Update(ctx context.Context, userReq model.User) error {
+	err := us.validateUserRequest(ctx, userReq)
+	if err != nil {
+		return err
+	}
+
 	user, err := us.repo.FindByID(ctx, userReq.ID)
 	if err != nil {
 		return err
+	}
+
+	user.Username = userReq.Username
+
+	if userReq.Password == "" {
+		encryptedData, err := crypto.EncryptPassword(userReq.Password)
+		if err != nil {
+			return err
+		}
+		user.Password = string(encryptedData)
 	}
 
 	err = user.Validate()
 	if err != nil {
 		return err
 	}
-
-	encryptedData, err := crypto.EncryptPassword(userReq.Password)
-	if err != nil {
-		return err
-	}
-
-	user.Username = userReq.Username
-	user.Password = string(encryptedData)
 
 	err = us.repo.Update(ctx, user)
 	if err != nil {
@@ -118,6 +125,13 @@ func (us *userService) Delete(ctx context.Context, id string) error {
 	err = us.repo.Delete(ctx, user)
 	if err != nil {
 		return err
+	}
+	return nil
+}
+
+func (us *userService) validateUserRequest(ctx context.Context, request model.User) error {
+	if request.Username == "" && request.Password == "" {
+		return errs.ErrMissingDataInRequest
 	}
 	return nil
 }
