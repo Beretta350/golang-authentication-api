@@ -19,7 +19,8 @@ type UserController interface {
 	RefreshToken(c *gin.Context)
 }
 
-const refreshTokenName string = "refresh_token"
+const accessTokenName string = "accessToken"
+const refreshTokenName string = "refreshToken"
 const expireAccessTokenInSeconds int64 = 300    //5 min
 const expireRefreshTokenInSeconds int64 = 86400 //24 hours
 
@@ -71,7 +72,7 @@ func (uc *userController) Login(c *gin.Context) {
 	}
 
 	c.SetCookie(refreshTokenName, refreshToken, int(expireRefreshTokenInSeconds), "/refreshToken", "localhost", false, true)
-	c.JSON(http.StatusOK, dto.OkResponse("Login with success", gin.H{"access_token": accessToken}))
+	c.JSON(http.StatusOK, dto.OkResponse("Login with success", gin.H{"accessToken": accessToken}))
 }
 
 func (uc *userController) Save(c *gin.Context) {
@@ -151,5 +152,5 @@ func (uc *userController) RefreshToken(c *gin.Context) {
 	}
 
 	c.SetCookie(refreshTokenName, refreshToken, int(expireRefreshTokenInSeconds), "/", "localhost", false, true)
-	c.JSON(http.StatusOK, dto.OkResponse("Success", gin.H{"access_token": accessToken}))
+	c.JSON(http.StatusOK, dto.OkResponse("Success", gin.H{"accessToken": accessToken}))
 }
