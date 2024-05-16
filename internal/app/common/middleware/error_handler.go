@@ -27,7 +27,8 @@ func GlobalErrorHandler() gin.HandlerFunc {
 		case errors.As(err, &validationErrors):
 			response = multipleErrorMessages(validationErrors)
 		case errors.Is(err, errs.ErrUsernameOrPasswordMismatch):
-			response = dto.UnauthorizedResponse("Invalid username or password", nil)
+		case errors.Is(err, errs.ErrMissingDataInRequest):
+			response = dto.UnauthorizedResponse(err.Error(), nil)
 		default:
 			response = dto.InternalErrorResponse(err.Error(), nil)
 
