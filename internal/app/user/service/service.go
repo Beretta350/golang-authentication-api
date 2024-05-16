@@ -93,6 +93,7 @@ func (us *userService) Update(ctx context.Context, userReq model.User) error {
 		return err
 	}
 
+	user.Username = userReq.Username
 	user.Password = string(encryptedData)
 
 	err = us.repo.Update(ctx, user)

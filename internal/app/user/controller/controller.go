@@ -93,13 +93,13 @@ func (uc *userController) Save(c *gin.Context) {
 }
 
 func (uc *userController) Update(c *gin.Context) {
-
 	userReq := userModel.User{}
 	err := c.BindJSON(&userReq)
 	if err != nil {
 		c.Error(err)
 		return
 	}
+	userReq.ID = c.Query("id")
 
 	err = uc.service.Update(c, userReq)
 	if err != nil {
