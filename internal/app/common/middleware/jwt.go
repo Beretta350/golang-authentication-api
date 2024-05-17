@@ -19,7 +19,7 @@ func JWTHandler(wrapper jwt.JWTWrapper) gin.HandlerFunc {
 			return
 		}
 
-		valid, _ := wrapper.ValidateAccessToken(userId, c.GetHeader("Authorization"))
+		valid, _ := wrapper.ValidateToken(userId, c.GetHeader("Authorization"))
 		if !valid {
 			c.Header("Authorization", "")
 			defaultJWTErrorFunc(c, nil)

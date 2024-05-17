@@ -3,10 +3,12 @@ package service
 import (
 	"context"
 
+	"github.com/Beretta350/authentication/internal/app/common/enum/constants"
 	"github.com/Beretta350/authentication/internal/app/user/model"
 	userRepo "github.com/Beretta350/authentication/internal/app/user/repository"
 	"github.com/Beretta350/authentication/internal/pkg/crypto"
 	"github.com/Beretta350/authentication/internal/pkg/errs"
+	"github.com/Beretta350/authentication/pkg/jwt"
 )
 
 type UserService interface {
@@ -15,6 +17,8 @@ type UserService interface {
 	Save(ctx context.Context, userReq model.User) error
 	Update(ctx context.Context, userReq model.User) error
 	Delete(ctx context.Context, id string) error
+	GenerateTokens(ctx context.Context, user *model.User) (string, string, error)
+	RefreshUserToken(ctx context.Context, id string, refreshToken string) (string, string, error)
 }
 
 type userService struct {
@@ -127,6 +131,39 @@ func (us *userService) Delete(ctx context.Context, id string) error {
 		return err
 	}
 	return nil
+}
+
+func (us *userService) GenerateTokens(ctx context.Context, user *model.User) (string, string, error) {
+	accessToken, err := jwt.GetJWTWrapper().GenerateJWT(user.ID, constants.ExpireAccessTokenInSeconds)
+	if err != nil {
+		return "", "", err
+	}
+
+	refreshToken, err := jwt.GetJWTWrapper().GenerateJWT(user.ID, constants.ExpireRefreshTokenInSeconds)
+	if err != nil {
+		return "", "", err
+	}
+
+	return accessToken, refreshToken, nil
+}
+
+func (us *userService) RefreshUserToken(ctx context.Context, id string, refreshToken string) (string, string, error) {
+	valid, err := jwt.GetJWTWrapper().ValidateToken(id, refreshToken)
+	if !valid {
+		return "", "", err
+	}
+
+	accessToken, err := jwt.GetJWTWrapper().GenerateJWT(id, constants.ExpireAccessTokenInSeconds)
+	if err != nil {
+		return "", "", err
+	}
+
+	refreshToken, err = jwt.GetJWTWrapper().GenerateJWT(id, constants.ExpireRefreshTokenInSeconds)
+	if err != nil {
+		return "", "", err
+	}
+
+	return accessToken, refreshToken, nil
 }
 
 func (us *userService) validateUserRequest(ctx context.Context, request model.User) error {

@@ -1,4 +1,4 @@
-package enum
+package roles
 
 const (
 	ADMIN = "ADMIN"
