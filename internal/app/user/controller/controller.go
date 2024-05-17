@@ -54,7 +54,7 @@ func (uc *userController) Login(c *gin.Context) {
 		return
 	}
 
-	accessToken, refreshToken, err := uc.service.GenerateTokens(c, user)
+	accessToken, refreshToken, err := uc.service.GenerateTokens(c, user.ID)
 	if err != nil {
 		c.Error(err)
 		return
@@ -116,13 +116,7 @@ func (uc *userController) Delete(c *gin.Context) {
 }
 
 func (uc *userController) RefreshToken(c *gin.Context) {
-	cookie, err := c.Request.Cookie(constants.RefreshTokenName)
-	if err != nil || len(cookie.Value) <= 0 {
-		c.Error(err)
-		return
-	}
-
-	accessToken, refreshToken, err := uc.service.RefreshUserToken(c, c.Query("id"), cookie.Value)
+	accessToken, refreshToken, err := uc.service.GenerateTokens(c, c.Query("id"))
 	if err != nil {
 		c.Error(err)
 		return
