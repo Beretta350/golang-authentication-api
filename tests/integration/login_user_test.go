@@ -16,6 +16,7 @@ import (
 )
 
 var accessToken string
+var refreshToken string
 
 func TestAuthenticationAPIUser_Login(t *testing.T) {
 	ctx := context.Background()
@@ -63,6 +64,7 @@ func loginUserHappyPathSubtest(t *testing.T, ctx context.Context, apiPort string
 
 		val := body.Data.(map[string]interface{})
 		accessToken = val["accessToken"].(string)
+		refreshToken = resp.Cookies()[0].Value
 	})
 }
 

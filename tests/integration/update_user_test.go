@@ -9,9 +9,11 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/Beretta350/authentication/internal/app/user/model"
 	"github.com/Beretta350/authentication/internal/pkg/dto"
 	"github.com/Beretta350/authentication/tests"
 	"github.com/stretchr/testify/assert"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -66,6 +68,14 @@ func updateUserHappyPathSubtest(t *testing.T, ctx context.Context, apiPort strin
 
 		err = resp.Body.Close()
 		assert.NoError(t, err)
+
+		user := model.User{}
+		filter := bson.M{"username": "updateSuccess"}
+		err = mongoClient.Database("authentication").Collection("user").FindOne(ctx, filter).Decode(&user)
+		assert.NoError(t, err)
+
+		assert.Equal(t, user.Username, "updateSuccess")
+		assert.Equal(t, user.Roles, []string{"USER"})
 	})
 }
 
