@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/Beretta350/authentication/config"
+	"github.com/Beretta350/authentication/internal/app/common/enum/constants"
 	"github.com/Beretta350/authentication/internal/app/common/middleware"
 	userController "github.com/Beretta350/authentication/internal/app/user/controller"
 	"github.com/Beretta350/authentication/pkg/jwt"
@@ -49,11 +50,11 @@ func Setup(cfg *config.Configuration) *gin.Engine {
 }
 
 func SetupUserRoutes(engine *gin.Engine, controller userController.UserController) *gin.Engine {
-	engine.GET("/refreshToken", controller.RefreshToken)
-	engine.GET("/user", controller.GetUserByID)
-	engine.POST("/login", controller.Login)
-	engine.POST("/save", controller.Save)
-	engine.PUT("/update", controller.Update)
-	engine.DELETE("/delete", controller.Delete)
+	engine.GET(constants.RefreshTokenRoute, controller.RefreshToken)
+	engine.GET(constants.GetUserByIDRoute, controller.GetUserByID)
+	engine.POST(constants.LoginRoute, controller.Login)
+	engine.POST(constants.SaveRoute, controller.Save)
+	engine.PUT(constants.UpdateRoute, controller.Update)
+	engine.DELETE(constants.DeleteRoute, controller.Delete)
 	return engine
 }

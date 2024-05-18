@@ -39,7 +39,7 @@ func (ur *userRepository) Save(ctx context.Context, user *userModel.User) error 
 }
 
 func (ur *userRepository) Update(ctx context.Context, user *userModel.User) error {
-	filter := bson.M{"_id": user.ID, "username": user.Username}
+	filter := bson.M{"_id": user.ID}
 	update := bson.M{"$set": user}
 
 	user.UpdatedAt = time.Now()
@@ -57,7 +57,7 @@ func (ur *userRepository) Update(ctx context.Context, user *userModel.User) erro
 }
 
 func (ur *userRepository) Delete(ctx context.Context, user *userModel.User) error {
-	filter := bson.M{"_id": user.ID, "username": user.Username}
+	filter := bson.M{"_id": user.ID}
 	_, err := ur.collection.DeleteOne(ctx, filter)
 	if err != nil {
 		return err

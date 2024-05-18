@@ -1,7 +1,7 @@
 package model
 
 import (
-	"github.com/Beretta350/authentication/internal/app/common/enum"
+	"github.com/Beretta350/authentication/internal/app/common/enum/roles"
 	commonModel "github.com/Beretta350/authentication/internal/app/common/model"
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
@@ -27,13 +27,13 @@ func (u User) Validate() error {
 
 func areValidRoles(fl validator.FieldLevel) bool {
 	// name := fl.FieldName()
-	roles := fl.Field().Interface().([]string)
+	userRoles := fl.Field().Interface().([]string)
 
 	validRoles := map[string]bool{
-		enum.ADMIN: true, enum.USER: true,
+		roles.ADMIN: true, roles.USER: true,
 	}
 
-	for _, role := range roles {
+	for _, role := range userRoles {
 		if !validRoles[role] {
 			return false
 		}
