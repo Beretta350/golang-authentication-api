@@ -21,6 +21,8 @@ So, if you have questions about the layout check the **link above**!
 
 - [**Bcrypt (Cryptography package)**](https://pkg.go.dev/golang.org/x/crypto): Securely hash and compare passwords providing a reliable method for storing and verifying passwords, ensuring that user credentials are protected against unauthorized access.
 
+- [**Testcontainers**](https://golang.testcontainers.org/): Testcontainers is a library for creating lightweight, disposable Docker containers for automated tests. It enables reliable and reproducible test environments, ensuring consistent integration testing by mimicking production-like setups.
+
 - [**Docker**](https://www.docker.com/): Docker is used to containerize the application, making it easy to manage dependencies and ensure consistency across different environments.
 
 - [**MongoDB**](https://www.mongodb.com/): NoSQL database with a robust and efficient way to perform CRUD operations, query data, and manage transactions in the application.
@@ -51,6 +53,15 @@ Use the API endpoints to manage your users effectively.
 - `DELETE /delete?id=<userId>`: Delete user.
 
 **OBS: Passwords must be at least 8 characters long**
+
+## Testing
+
+The application is covered by integration tests focused on verifying that the application works correctly as a whole.
+
+Run integration tests:
+- ```go test github.com/Beretta350/authentication/tests/integration```
+
+**OBS: Becareful with timeout setted, the integration tests running time is arround 100s**
 
 ## Contributions
 
