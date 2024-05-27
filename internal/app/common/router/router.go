@@ -6,13 +6,15 @@ import (
 	"os"
 
 	"github.com/Beretta350/authentication/config"
-	"github.com/Beretta350/authentication/internal/app/common/enum/constants"
+	router_constants "github.com/Beretta350/authentication/internal/app/common/constants/router"
 	"github.com/Beretta350/authentication/internal/app/common/middleware"
 	userController "github.com/Beretta350/authentication/internal/app/user/controller"
 	"github.com/Beretta350/authentication/pkg/jwt"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
+
+const localhostPath string = "http://localhost:8080"
 
 func Setup(cfg *config.Configuration) *gin.Engine {
 	app := gin.New()
@@ -36,9 +38,12 @@ func Setup(cfg *config.Configuration) *gin.Engine {
 	}))
 
 	corsConfig := cors.DefaultConfig()
-	corsConfig.AllowOrigins = []string{"http://localhost:8080"}
+	corsConfig.AllowOrigins = []string{localhostPath}
 
-	jwtWrap := jwt.NewJWTWrapper(cfg.JWTSecret, []string{"/login", "/save", "/refresh"})
+	jwtWrap := jwt.NewJWTWrapper(
+		cfg.JWTSecret,
+		[]string{router_constants.LoginRoute, router_constants.SaveRoute},
+	)
 
 	app.Use(gin.Recovery())
 	app.Use(cors.New(corsConfig))
@@ -50,11 +55,11 @@ func Setup(cfg *config.Configuration) *gin.Engine {
 }
 
 func SetupUserRoutes(engine *gin.Engine, controller userController.UserController) *gin.Engine {
-	engine.GET(constants.RefreshTokenRoute, controller.RefreshToken)
-	engine.GET(constants.GetUserByIDRoute, controller.GetUserByID)
-	engine.POST(constants.LoginRoute, controller.Login)
-	engine.POST(constants.SaveRoute, controller.Save)
-	engine.PUT(constants.UpdateRoute, controller.Update)
-	engine.DELETE(constants.DeleteRoute, controller.Delete)
+	engine.GET(router_constants.RefreshTokenRoute, controller.RefreshToken)
+	engine.GET(router_constants.GetUserByIDRoute, controller.GetUserByID)
+	engine.POST(router_constants.LoginRoute, controller.Login)
+	engine.POST(router_constants.SaveRoute, controller.Save)
+	engine.PUT(router_constants.UpdateRoute, controller.Update)
+	engine.DELETE(router_constants.DeleteRoute, controller.Delete)
 	return engine
 }
