@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 
-	"github.com/Beretta350/authentication/internal/app/common/enum/constants"
+	token_constants "github.com/Beretta350/authentication/internal/app/common/constants/token"
 	"github.com/Beretta350/authentication/internal/app/user/model"
 	userRepo "github.com/Beretta350/authentication/internal/app/user/repository"
 	"github.com/Beretta350/authentication/internal/pkg/crypto"
@@ -133,12 +133,12 @@ func (us *userService) Delete(ctx context.Context, id string) error {
 }
 
 func (us *userService) GenerateTokens(ctx context.Context, userId string) (string, string, error) {
-	accessToken, err := jwt.GetJWTWrapper().GenerateJWT(userId, constants.ExpireAccessTokenInSeconds)
+	accessToken, err := jwt.GetJWTWrapper().GenerateJWT(userId, token_constants.ExpireAccessTokenInSeconds)
 	if err != nil {
 		return "", "", err
 	}
 
-	refreshToken, err := jwt.GetJWTWrapper().GenerateJWT(userId, constants.ExpireRefreshTokenInSeconds)
+	refreshToken, err := jwt.GetJWTWrapper().GenerateJWT(userId, token_constants.ExpireRefreshTokenInSeconds)
 	if err != nil {
 		return "", "", err
 	}

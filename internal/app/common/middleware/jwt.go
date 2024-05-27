@@ -1,7 +1,9 @@
 package middleware
 
 import (
-	"github.com/Beretta350/authentication/internal/app/common/enum/constants"
+	messages_constants "github.com/Beretta350/authentication/internal/app/common/constants/messages"
+	router_constants "github.com/Beretta350/authentication/internal/app/common/constants/router"
+	token_constants "github.com/Beretta350/authentication/internal/app/common/constants/token"
 	"github.com/Beretta350/authentication/internal/pkg/dto"
 	"github.com/Beretta350/authentication/pkg/jwt"
 	"github.com/gin-gonic/gin"
@@ -27,7 +29,7 @@ func JWTHandler(wrapper jwt.JWTWrapper) gin.HandlerFunc {
 			return
 		}
 
-		if c.Request.URL.Path == constants.RefreshTokenRoute {
+		if c.Request.URL.Path == router_constants.RefreshTokenRoute {
 			validateRefreshTokenCookie(c, wrapper, userId)
 		}
 
@@ -36,7 +38,7 @@ func JWTHandler(wrapper jwt.JWTWrapper) gin.HandlerFunc {
 }
 
 func validateRefreshTokenCookie(c *gin.Context, wrapper jwt.JWTWrapper, userId string) {
-	cookie, err := c.Request.Cookie(constants.RefreshTokenName)
+	cookie, err := c.Request.Cookie(token_constants.RefreshTokenName)
 	if err != nil || len(cookie.Value) <= 0 {
 		c.Header("Authorization", "")
 		defaultJWTErrorFunc(c, nil)
@@ -52,7 +54,7 @@ func validateRefreshTokenCookie(c *gin.Context, wrapper jwt.JWTWrapper, userId s
 }
 
 func defaultJWTErrorFunc(c *gin.Context, err error) {
-	response := dto.UnauthorizedResponse("Invalid JWT token", err)
+	response := dto.UnauthorizedResponse(messages_constants.InvalidTokenMessage, err)
 	c.JSON(response.StatusCode, response)
 	c.Abort()
 }

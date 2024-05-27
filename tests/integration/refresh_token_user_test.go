@@ -8,7 +8,8 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/Beretta350/authentication/internal/app/common/enum/constants"
+	messages_constants "github.com/Beretta350/authentication/internal/app/common/constants/messages"
+	token_constants "github.com/Beretta350/authentication/internal/app/common/constants/token"
 	"github.com/Beretta350/authentication/internal/pkg/dto"
 	"github.com/Beretta350/authentication/tests"
 	"github.com/stretchr/testify/assert"
@@ -40,7 +41,7 @@ func refreshUserHappyPathSubtest(t *testing.T, ctx context.Context, apiPort stri
 
 		req.Header.Set("Content-Type", "application/json")
 		req.Header.Add("Authorization", accessToken)
-		req.AddCookie(&http.Cookie{Name: constants.RefreshTokenName, Value: refreshToken})
+		req.AddCookie(&http.Cookie{Name: token_constants.RefreshTokenName, Value: refreshToken})
 
 		client := &http.Client{}
 		resp, err := client.Do(req)
@@ -53,8 +54,8 @@ func refreshUserHappyPathSubtest(t *testing.T, ctx context.Context, apiPort stri
 		err = json.Unmarshal(bodyBytes, &body)
 		assert.NoError(t, err)
 
-		assert.Equal(t, resp.StatusCode, http.StatusOK)
-		assert.Equal(t, "Token refreshed Successfully", body.Message)
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
+		assert.Equal(t, messages_constants.RefreshTokenSuccessMessage, body.Message)
 		err = resp.Body.Close()
 		assert.NoError(t, err)
 
@@ -73,7 +74,7 @@ func refreshNoHeaderSubtest(t *testing.T, ctx context.Context, apiPort string, m
 		assert.NoError(t, err)
 
 		req.Header.Set("Content-Type", "application/json")
-		req.AddCookie(&http.Cookie{Name: constants.RefreshTokenName, Value: refreshToken})
+		req.AddCookie(&http.Cookie{Name: token_constants.RefreshTokenName, Value: refreshToken})
 
 		client := &http.Client{}
 		resp, err := client.Do(req)
@@ -86,8 +87,8 @@ func refreshNoHeaderSubtest(t *testing.T, ctx context.Context, apiPort string, m
 		err = json.Unmarshal(bodyBytes, &body)
 		assert.NoError(t, err)
 
-		assert.Equal(t, resp.StatusCode, http.StatusUnauthorized)
-		assert.Equal(t, "Invalid JWT token", body.Message)
+		assert.Equal(t, http.StatusUnauthorized, resp.StatusCode)
+		assert.Equal(t, messages_constants.InvalidTokenMessage, body.Message)
 		err = resp.Body.Close()
 		assert.NoError(t, err)
 	})
@@ -115,8 +116,8 @@ func refreshNoCookieSubtest(t *testing.T, ctx context.Context, apiPort string, m
 		err = json.Unmarshal(bodyBytes, &body)
 		assert.NoError(t, err)
 
-		assert.Equal(t, resp.StatusCode, http.StatusUnauthorized)
-		assert.Equal(t, "Invalid JWT token", body.Message)
+		assert.Equal(t, http.StatusUnauthorized, resp.StatusCode)
+		assert.Equal(t, messages_constants.InvalidTokenMessage, body.Message)
 		err = resp.Body.Close()
 		assert.NoError(t, err)
 	})

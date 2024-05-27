@@ -1,7 +1,7 @@
 package model
 
 import (
-	"github.com/Beretta350/authentication/internal/app/common/enum/roles"
+	"github.com/Beretta350/authentication/internal/app/common/constants/roles"
 	commonModel "github.com/Beretta350/authentication/internal/app/common/model"
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"

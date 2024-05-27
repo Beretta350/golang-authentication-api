@@ -1,4 +1,4 @@
-package constants
+package token_constants
 
 const (
 	RefreshTokenName            string = "refreshToken"

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"strings"
 
+	messages_constants "github.com/Beretta350/authentication/internal/app/common/constants/messages"
 	"github.com/Beretta350/authentication/internal/pkg/dto"
 	"github.com/Beretta350/authentication/internal/pkg/errs"
 	"github.com/gin-gonic/gin"
@@ -34,7 +35,7 @@ func GlobalErrorHandler() gin.HandlerFunc {
 			response = dto.InternalErrorResponse(err.Error(), nil)
 
 			if _, ok := err.(*jwt.ValidationError); ok {
-				response = dto.UnauthorizedResponse("Invalid JWT token", err)
+				response = dto.UnauthorizedResponse(messages_constants.InvalidTokenMessage, err)
 			}
 		}
 
@@ -49,5 +50,5 @@ func multipleErrorMessages(validationErrors validator.ValidationErrors) *dto.Res
 		errMsg := strings.Split(e.Error(), "Error:")[1]
 		errs = append(errs, errMsg)
 	}
-	return dto.BadRequestResponse("Invalid data", errs)
+	return dto.BadRequestResponse(messages_constants.InvalidDataMessage, errs)
 }

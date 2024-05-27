@@ -3,7 +3,9 @@ package controller
 import (
 	"net/http"
 
-	"github.com/Beretta350/authentication/internal/app/common/enum/constants"
+	messages_constants "github.com/Beretta350/authentication/internal/app/common/constants/messages"
+	router_constants "github.com/Beretta350/authentication/internal/app/common/constants/router"
+	token_constants "github.com/Beretta350/authentication/internal/app/common/constants/token"
 	userModel "github.com/Beretta350/authentication/internal/app/user/model"
 	userService "github.com/Beretta350/authentication/internal/app/user/service"
 	"github.com/Beretta350/authentication/internal/pkg/dto"
@@ -37,7 +39,7 @@ func (uc *userController) GetUserByID(c *gin.Context) {
 	}
 
 	userResponse := dto.NewUserResponseFromModel(*user)
-	c.JSON(http.StatusOK, dto.OkResponse("Success", userResponse))
+	c.JSON(http.StatusOK, dto.OkResponse(messages_constants.SuccessMessage, userResponse))
 }
 
 func (uc *userController) Login(c *gin.Context) {
@@ -60,8 +62,8 @@ func (uc *userController) Login(c *gin.Context) {
 		return
 	}
 
-	c.SetCookie(constants.RefreshTokenName, refreshToken, int(constants.ExpireRefreshTokenInSeconds), "/refreshToken", "localhost", false, true)
-	c.JSON(http.StatusOK, dto.OkResponse("Login with success", gin.H{"accessToken": accessToken}))
+	c.SetCookie(token_constants.RefreshTokenName, refreshToken, int(token_constants.ExpireRefreshTokenInSeconds), router_constants.RefreshTokenRoute, "localhost", false, true)
+	c.JSON(http.StatusOK, dto.OkResponse(messages_constants.LoginSuccessMessage, gin.H{"accessToken": accessToken}))
 }
 
 func (uc *userController) Save(c *gin.Context) {
@@ -97,8 +99,8 @@ func (uc *userController) Update(c *gin.Context) {
 	}
 
 	c.Header("Authorization", "")
-	c.SetCookie(constants.RefreshTokenName, "", 0, "/", "localhost", false, true)
-	c.JSON(http.StatusOK, dto.OkResponse("User successfully updated", nil))
+	c.SetCookie(token_constants.RefreshTokenName, "", 0, "/", "localhost", false, true)
+	c.JSON(http.StatusOK, dto.OkResponse(messages_constants.UpdateSuccessMessage, nil))
 }
 
 func (uc *userController) Delete(c *gin.Context) {
@@ -111,8 +113,8 @@ func (uc *userController) Delete(c *gin.Context) {
 	}
 
 	c.Header("Authorization", "")
-	c.SetCookie(constants.RefreshTokenName, "", 0, "/", "localhost", false, true)
-	c.JSON(http.StatusOK, dto.OkResponse("User successfully deleted", nil))
+	c.SetCookie(token_constants.RefreshTokenName, "", 0, "/", "localhost", false, true)
+	c.JSON(http.StatusOK, dto.OkResponse(messages_constants.DeleteSuccessMessage, nil))
 }
 
 func (uc *userController) RefreshToken(c *gin.Context) {
@@ -122,6 +124,6 @@ func (uc *userController) RefreshToken(c *gin.Context) {
 		return
 	}
 
-	c.SetCookie(constants.RefreshTokenName, refreshToken, int(constants.ExpireRefreshTokenInSeconds), "/", "localhost", false, true)
-	c.JSON(http.StatusOK, dto.OkResponse("Token refreshed Successfully", gin.H{"accessToken": accessToken}))
+	c.SetCookie(token_constants.RefreshTokenName, refreshToken, int(token_constants.ExpireRefreshTokenInSeconds), "/", "localhost", false, true)
+	c.JSON(http.StatusOK, dto.OkResponse(messages_constants.RefreshTokenSuccessMessage, gin.H{"accessToken": accessToken}))
 }

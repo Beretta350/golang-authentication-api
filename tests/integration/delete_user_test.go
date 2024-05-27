@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"testing"
 
+	messages_constants "github.com/Beretta350/authentication/internal/app/common/constants/messages"
 	"github.com/Beretta350/authentication/internal/app/user/model"
 	"github.com/Beretta350/authentication/internal/pkg/dto"
 	"github.com/Beretta350/authentication/tests"
@@ -56,7 +57,7 @@ func deleteUserHappyPathSubtest(t *testing.T, ctx context.Context, apiPort strin
 		assert.NoError(t, err)
 
 		assert.Equal(t, resp.StatusCode, http.StatusOK)
-		assert.Equal(t, "User successfully deleted", body.Message)
+		assert.Equal(t, messages_constants.DeleteSuccessMessage, body.Message)
 
 		err = resp.Body.Close()
 		assert.NoError(t, err)
@@ -92,7 +93,7 @@ func deleteNoHeaderSubtest(t *testing.T, ctx context.Context, apiPort string, mo
 		assert.NoError(t, err)
 
 		assert.Equal(t, resp.StatusCode, http.StatusUnauthorized)
-		assert.Equal(t, "Invalid JWT token", body.Message)
+		assert.Equal(t, messages_constants.InvalidTokenMessage, body.Message)
 
 		err = resp.Body.Close()
 		assert.NoError(t, err)
@@ -121,7 +122,7 @@ func deleteWrongIdSubtest(t *testing.T, ctx context.Context, apiPort string, mon
 		assert.NoError(t, err)
 
 		assert.Equal(t, resp.StatusCode, http.StatusUnauthorized)
-		assert.Equal(t, "Invalid JWT token", body.Message)
+		assert.Equal(t, messages_constants.InvalidTokenMessage, body.Message)
 
 		err = resp.Body.Close()
 		assert.NoError(t, err)

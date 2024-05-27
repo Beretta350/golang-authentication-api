@@ -1,4 +1,4 @@
-package constants
+package router_constants
 
 const (
 	GetUserByIDRoute  string = "/user"

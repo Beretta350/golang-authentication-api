@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"testing"
 
+	messages_constants "github.com/Beretta350/authentication/internal/app/common/constants/messages"
 	"github.com/Beretta350/authentication/internal/pkg/dto"
 	"github.com/Beretta350/authentication/tests"
 	"github.com/stretchr/testify/assert"
@@ -54,7 +55,7 @@ func getUserHappyPathSubtest(t *testing.T, ctx context.Context, apiPort string, 
 		assert.NoError(t, err)
 
 		assert.Equal(t, resp.StatusCode, http.StatusOK)
-		assert.Equal(t, "Success", body.Message)
+		assert.Equal(t, messages_constants.SuccessMessage, body.Message)
 
 		user := body.Data.(map[string]interface{})
 
@@ -90,7 +91,7 @@ func getUserNoHeaderSubtest(t *testing.T, ctx context.Context, apiPort string, m
 		assert.NoError(t, err)
 
 		assert.Equal(t, resp.StatusCode, http.StatusUnauthorized)
-		assert.Equal(t, "Invalid JWT token", body.Message)
+		assert.Equal(t, messages_constants.InvalidTokenMessage, body.Message)
 
 		err = resp.Body.Close()
 		assert.NoError(t, err)
@@ -119,7 +120,7 @@ func getUserWrongIdSubtest(t *testing.T, ctx context.Context, apiPort string, mo
 		assert.NoError(t, err)
 
 		assert.Equal(t, resp.StatusCode, http.StatusUnauthorized)
-		assert.Equal(t, "Invalid JWT token", body.Message)
+		assert.Equal(t, messages_constants.InvalidTokenMessage, body.Message)
 
 		err = resp.Body.Close()
 		assert.NoError(t, err)

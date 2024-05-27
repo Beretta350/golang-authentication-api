@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"testing"
 
+	messages_constants "github.com/Beretta350/authentication/internal/app/common/constants/messages"
 	"github.com/Beretta350/authentication/internal/pkg/dto"
 	"github.com/Beretta350/authentication/tests"
 	"github.com/stretchr/testify/assert"
@@ -58,7 +59,7 @@ func loginUserHappyPathSubtest(t *testing.T, ctx context.Context, apiPort string
 		assert.NoError(t, err)
 
 		assert.Equal(t, resp.StatusCode, http.StatusOK)
-		assert.Equal(t, "Login with success", body.Message)
+		assert.Equal(t, messages_constants.LoginSuccessMessage, body.Message)
 		err = resp.Body.Close()
 		assert.NoError(t, err)
 
