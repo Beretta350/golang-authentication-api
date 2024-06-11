@@ -40,18 +40,25 @@ func Setup(configFile string) {
 		log.Fatalln("error loading environment file: %w", err)
 	}
 
-	dbPort, err := strconv.Atoi(os.Getenv("DB_PORT"))
-	if err != nil {
-		log.Fatalln("invalid database port: %w", err)
+	var dbPort int
+	if os.Getenv("DB_PORT") != "" {
+		dbPort, err = strconv.Atoi(os.Getenv("DB_PORT"))
+		if err != nil {
+			log.Fatalln("invalid database port: %w", err)
+		}
+	} else {
+		dbPort = 0
 	}
 
 	dbConfig := DatabaseConfig{
-		Driver:   os.Getenv("DB_DRIVER"),
-		Host:     os.Getenv("DB_HOST"),
-		Port:     dbPort,
-		Username: os.Getenv("DB_USERNAME"),
-		Password: os.Getenv("DB_PASSWORD"),
-		Database: os.Getenv("DB_DATABASE"),
+		Driver:         os.Getenv("DB_DRIVER"),
+		Host:           os.Getenv("DB_HOST"),
+		Port:           dbPort,
+		Username:       os.Getenv("DB_USERNAME"),
+		Password:       os.Getenv("DB_PASSWORD"),
+		Database:       os.Getenv("DB_DATABASE"),
+		ClusterAddress: os.Getenv("DB_CLUSTER_ADDRS"),
+		AppName:        os.Getenv("DB_APPNAME"),
 	}
 
 	// Server configuration
