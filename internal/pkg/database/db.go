@@ -11,7 +11,8 @@ import (
 )
 
 func ConnectDB(ctx context.Context, cfg config.DatabaseConfig) *mongo.Database {
-	clientOptions := options.Client().ApplyURI(cfg.GetURI())
+	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
+	clientOptions := options.Client().ApplyURI(cfg.GetURI()).SetServerAPIOptions(serverAPI)
 
 	client, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
