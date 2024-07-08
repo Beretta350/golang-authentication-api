@@ -17,16 +17,15 @@ func Run(env string) {
 	if env == "" {
 		env = "local"
 	}
-	config.Setup(env)
 
-	cfg := config.GetConfig()
 	ctx := context.Background()
+	cfg := config.SetupConfig(env)
 
 	//mongodb
-	mongodb := database.ConnectDB(ctx, cfg.Database)
+	mongodbConn := database.NewMongoDB().ConnectDB(ctx)
 
 	//repositories
-	userRepo := userRepo.NewUserRepository(mongodb)
+	userRepo := userRepo.NewUserRepository(mongodbConn)
 
 	//services
 	userService := userService.NewUserService(userRepo)
@@ -39,6 +38,6 @@ func Run(env string) {
 	web = router.SetupUserRoutes(web, userController)
 
 	//run
-	log.Printf("Server running on port %v in %v mode\n", cfg.Server.Port, cfg.Server.Mode)
-	_ = web.Run(":" + fmt.Sprint(cfg.Server.Port))
+	log.Printf("Server running on port %v in %v mode\n", cfg.Server.GetPort(), cfg.Server.GetMode())
+	_ = web.Run(":" + fmt.Sprint(cfg.Server.GetPort()))
 }

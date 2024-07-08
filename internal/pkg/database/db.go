@@ -3,27 +3,40 @@ package database
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"github.com/Beretta350/authentication/config"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func ConnectDB(ctx context.Context, cfg config.DatabaseConfig) *mongo.Database {
-	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
-	clientOptions := options.Client().ApplyURI(cfg.GetURI()).SetServerAPIOptions(serverAPI)
+type DatabaseConfig interface {
+	ConnectDB(ctx context.Context) any
+	GetURI() string
+}
 
-	client, err := mongo.Connect(ctx, clientOptions)
-	if err != nil {
-		log.Fatalf("error connecting to MongoDB: %v", err)
+func getDbUri() string {
+	var uri string
+	dbConfig := config.GetConfig().Database
+
+	switch dbConfig.GetProtocol() {
+	case "mongodb+srv":
+		uri = fmt.Sprintf(
+			"mongodb+srv://%s:%s@%s.mongodb.net/?retryWrites=true&w=majority&appName=%s",
+			dbConfig.GetUsername(),
+			dbConfig.GetPassword(),
+			dbConfig.GetClusterAddress(),
+			dbConfig.GetAppName(),
+		)
+	case "mongodb":
+		uri = fmt.Sprintf(
+			"mongodb://%s:%s@%s:%d/",
+			dbConfig.GetUsername(),
+			dbConfig.GetPassword(),
+			dbConfig.GetHost(),
+			dbConfig.GetPort(),
+		)
+	default:
+		panic("Unsupported database protocol")
 	}
 
-	err = client.Ping(ctx, nil)
-	if err != nil {
-		log.Fatalf("error pinging MongoDB server: %v", err)
-	}
-
-	fmt.Println("Connected to MongoDB!")
-	return client.Database(cfg.Database)
+	fmt.Printf("URI: %v\n", uri)
+	return uri
 }

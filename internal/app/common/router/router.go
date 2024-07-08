@@ -50,7 +50,7 @@ func Setup(cfg *config.Configuration) *gin.Engine {
 	app.Use(middleware.JWTHandler(jwtWrap))
 	app.Use(middleware.GlobalErrorHandler())
 
-	gin.SetMode(cfg.Server.Mode)
+	gin.SetMode(cfg.Server.GetMode())
 	return app
 }
 
