@@ -22,10 +22,10 @@ func Run(env string) {
 	cfg := config.SetupConfig(env)
 
 	//mongodb
-	mongodbConn := database.NewMongoDB().ConnectDB(ctx)
+	dynamodbConn := database.NewDynamoDBSession().ConnectDB(ctx)
 
 	//repositories
-	userRepo := userRepo.NewUserRepository(mongodbConn)
+	userRepo := userRepo.NewDynamoDBUserRepository(dynamodbConn)
 
 	//services
 	userService := userService.NewUserService(userRepo)

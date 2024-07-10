@@ -20,6 +20,24 @@ services:
         ports:
             - 8080:8080
 
+    dynamodb:
+        container_name: dynamodb
+        command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ./data"
+        image: "amazon/dynamodb-local:latest"
+        working_dir: /home/dynamodblocal
+        ports:
+            - "8000:8000"
+        volumes:
+            - ./dynamodb-data:/home/dynamodblocal/data
+    
+    dynamodb-init:
+        image: amazon/aws-cli
+        depends_on:
+            - dynamodb
+        volumes:
+            - ./scripts/database/dynamo-init.sh:/scripts
+        entrypoint: ["sh", "/scripts/dynamo-init.sh"]
+
     mongodb:
         image: mongo:latest
         container_name: mongodb

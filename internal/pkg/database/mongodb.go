@@ -10,18 +10,19 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-type MongoDB struct{}
+type MongoDB struct {
+	clientOpts *options.ClientOptions
+}
 
-func NewMongoDB() *MongoDB {
-	return &MongoDB{}
+func NewMongoDBClient() *MongoDB {
+	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
+	opts := options.Client().ApplyURI(getDbUri()).SetServerAPIOptions(serverAPI)
+	return &MongoDB{clientOpts: opts}
 }
 
 func (db *MongoDB) ConnectDB(ctx context.Context) *mongo.Database {
 	dbConfig := config.GetConfig().Database
-	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
-	clientOptions := options.Client().ApplyURI(db.GetURI()).SetServerAPIOptions(serverAPI)
-
-	client, err := mongo.Connect(ctx, clientOptions)
+	client, err := mongo.Connect(ctx, db.clientOpts)
 	if err != nil {
 		log.Fatalf("error connecting to MongoDB: %v", err)
 	}
